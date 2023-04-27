@@ -9,6 +9,8 @@
         int line;
     };
 
+    extern int line_num ;
+
     char* getSymbol(char *name);
     void setSymbol(char *name, char *type, char *value, int line);
     struct SymbolTable symbolTable[10000];
@@ -34,6 +36,7 @@
 %token LPAREN RPAREN LBRACE RBRACE SEMI 
 
 
+
 %right ASSIGN
 %left OR 
 %left AND
@@ -49,27 +52,29 @@
 program :  stmt_list
         ;
 
-stmt    : expr SEMI
-        | assignment SEMI
-        | if_stmt 
-        | while_stmt
-        | repeat_stmt
-        | print_stmt SEMI
-        | for_stmt
-        | function_stmt
-        | switch_stmt
-        | break_stmt SEMI
-        | block_stmt
-        | enum_stmt
-        | return_stmt SEMI
+stmt    : expr SEMI {printf("%d %s" , line_num , "expr\n");}
+        | if_stmt  {printf("%d %s" , line_num , "if\n");}
+        | assignment SEMI {printf("%d %s" , line_num , "assignment\n");}
+        | while_stmt {printf("%d %s" , line_num , "while\n");}
+        | repeat_stmt {printf("%d %s" , line_num , "repeat\n");}
+        | print_stmt SEMI {printf("%d %s" , line_num , "print\n");}
+        | for_stmt {printf("%d %s" , line_num , "for\n");}
+        | function_stmt {printf("%d %s" , line_num , "function\n");}
+        | switch_stmt {printf("%d %s" , line_num , "switch\n");}
+        | break_stmt SEMI {printf("%d %s" , line_num , "break\n");}
+        | block_stmt {printf("%d %s" , line_num , "block\n");}
+        | enum_stmt SEMI {printf("%d %s" , line_num , "enum\n");}
+        | return_stmt SEMI {printf("%d %s" , line_num , "return\n");}
+        | CONTINUE SEMI {printf("%d %s" , line_num , "continue\n");}
+        | declare SEMI { printf("%d %s" , line_num , "declare\n");}
         ;
 
-stmt_list : stmt 
-          | stmt stmt_list
+stmt_list : stmt stmt_list 
+          | stmt
           ;
 
 
-expr    : expr PLUS expr  {printf("PLUS\n");}
+expr    : expr PLUS expr  
         | expr MINUS expr
         | expr TIMES expr
         | expr DIV expr
@@ -91,8 +96,12 @@ expr    : expr PLUS expr  {printf("PLUS\n");}
         | ID
         ;
 
-assignment : ID ASSIGN expr
+assignment : type ID ASSIGN expr
+              | ID ASSIGN expr
+              | CONST type ID ASSIGN expr
            ;
+declare : type ID 
+        ;
 
 if_stmt  : IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ENDIF
          | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE
@@ -104,7 +113,7 @@ while_stmt : WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE
 for_stmt : FOR LPAREN assignment SEMI expr SEMI assignment RPAREN LBRACE stmt_list RBRACE
             ;
 
-repeat_stmt : REPEAT LBRACE stmt_list RBRACE UNTIL LPAREN expr RPAREN
+repeat_stmt : REPEAT LBRACE stmt_list RBRACE UNTIL LPAREN expr RPAREN SEMI
             ;
         
 print_stmt : PRINT LPAREN expr RPAREN
@@ -121,7 +130,7 @@ param : type ID
       |  {printf("empty param list\n");}
       ;
 
-function_stmt : type ID LPAREN param RPAREN LBRACE stmt_list RBRACE {printf("function\n");}
+function_stmt : type ID LPAREN param RPAREN LBRACE stmt_list RBRACE 
               ;
 
 switch_stmt : SWITCH LPAREN expr RPAREN LBRACE case_stmt RBRACE
@@ -131,9 +140,9 @@ break_stmt : BREAK
            | {printf("empty break statement\n");}
            ;
 
-case_stmt :   CASE expr COLON stmt_list break_stmt SEMI case_stmt
-            | CASE expr COLON stmt_list break_stmt SEMI
-            | DEFAULT COLON stmt_list break_stmt SEMI
+case_stmt :   CASE expr COLON stmt_list case_stmt
+            | CASE expr COLON stmt_list  
+            | DEFAULT COLON stmt_list  
             | {printf("empty case statement\n");}
             ;
 
