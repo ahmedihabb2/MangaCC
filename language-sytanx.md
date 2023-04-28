@@ -86,3 +86,4 @@
 
 # TODOs 
 - enum color c ;
+- Function calls
