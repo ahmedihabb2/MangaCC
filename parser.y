@@ -67,6 +67,7 @@ stmt    : expr SEMI {printf("%d %s" , line_num , "expr\n");}
         | return_stmt SEMI {printf("%d %s" , line_num , "return\n");}
         | CONTINUE SEMI {printf("%d %s" , line_num , "continue\n");}
         | declare SEMI { printf("%d %s" , line_num , "declare\n");}
+        | func_call_stmt SEMI {printf("%d %s" , line_num , "function call\n");}
         ;
 
 stmt_list : stmt stmt_list 
@@ -90,6 +91,7 @@ expr    : expr PLUS expr
         | expr XOR expr
         | NOT expr
         | LPAREN expr RPAREN
+        | func_call_stmt
         | INT
         | FLOAT
         | BOOL
@@ -126,12 +128,20 @@ type : INTTYPE
      ;
 
 param : type ID
-      | type ID COMMA param    
-      |  {printf("empty param list\n");}
+      | type ID COMMA param   
+      | {printf("empty param list\n");}
       ;
+
+param_call : | ID COMMA param_call 
+             | ID
+             | {printf("empty param call list\n");}
+             ;
 
 function_stmt : type ID LPAREN param RPAREN LBRACE stmt_list RBRACE 
               ;
+
+func_call_stmt : ID LPAREN param_call RPAREN
+               ;
 
 switch_stmt : SWITCH LPAREN expr RPAREN LBRACE case_stmt RBRACE
             ;

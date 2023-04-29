@@ -52,3 +52,7 @@ switch ( a ) {
     int k = a + b ;
     break;
 }
+add(a, b);
+add();
+int y = add(a, b) ;
+y = add(a, b) ;
