@@ -87,3 +87,14 @@
 # TODOs 
 - enum color c ;
 - Function calls
+- Bison work with left recursion  
+    - stmt_list : stmt stmt_list 
+          | stmt
+          ;
+    Will be
+    - stmt_list : stmt stmt_list 
+          | stmt
+          ;
+
+- Remove void from type make it separate as there is no  void x = 5;
+
