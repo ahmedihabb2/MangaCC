@@ -107,7 +107,7 @@ declare : type ID
         ;
 
 else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE else_if_stmt
-             | ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE
+             | else_if_stmt ELSE LBRACE stmt_list RBRACE
              | {printf("%d %s" , line_num , "empty else if stmt\n");}
              ;
 
