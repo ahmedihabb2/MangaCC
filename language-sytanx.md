@@ -99,3 +99,5 @@
 - Remove void from type make it separate as there is no  void x = 5;
 
 - print statement not works with string
+
+- support char and string as data type

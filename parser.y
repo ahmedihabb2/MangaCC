@@ -72,7 +72,7 @@ stmt    : expr SEMI {printf("%d %s" , line_num , "expr\n");}
 
 stmt_list : stmt stmt_list 
           | stmt
-          | {printf("empty stmt list\n");}
+          | {printf("%d %s" , line_num , "empty stmt list\n");}
           ;
 
 
@@ -136,7 +136,7 @@ type : INTTYPE
 
 param : type ID
       | type ID COMMA param   
-      | {printf("empty param list\n");}
+      |  {printf("%d %s" , line_num , "empty param list\n");}
       ;
 
 param_call : | ID COMMA param_call 
