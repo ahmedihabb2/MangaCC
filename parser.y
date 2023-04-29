@@ -72,6 +72,7 @@ stmt    : expr SEMI {printf("%d %s" , line_num , "expr\n");}
 
 stmt_list : stmt stmt_list 
           | stmt
+          | {printf("empty stmt list\n");}
           ;
 
 

@@ -56,3 +56,6 @@ add(a, b);
 add();
 int y = add(a, b) ;
 y = add(a, b) ;
+
+void main () {
+}
