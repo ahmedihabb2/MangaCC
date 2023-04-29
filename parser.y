@@ -108,12 +108,12 @@ declare : type ID
 
 else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE else_if_stmt
              | ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE
-             | {printf("empty else id stmt\n");}
+             | {printf("%d %s" , line_num , "empty else if stmt\n");}
              ;
 
 if_stmt  : IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ENDIF
          | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE
-         | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE else_if_stmt
+         | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE else_if_stmt
          ;
 
 while_stmt : WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE
