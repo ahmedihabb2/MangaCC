@@ -10,6 +10,7 @@
 "if"         {return IF;}
 "endif"      {return ENDIF;}
 "else"       {return ELSE;}
+"else if"    {return ELSEIF;}
 "while"      {return WHILE;}
 "for"        {return FOR;}
 "break"      {return BREAK;}

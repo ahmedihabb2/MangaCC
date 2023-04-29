@@ -131,13 +131,15 @@ for (int i = 0; i < 10; i = i+1) {
         int k = 5;
     }
 
-    // if (true) {
-    //     int k = 5;
-    // } else if (true) {
-    //     int k = 5;
-    // } else {
-    //     int k = 5;
-    // }
+    if (true) {
+        int k = 5;
+    } else if (true) {
+        int k = 5;
+    } else if (false) {
+        int k = 5;
+    } else {
+        int k = 5;
+    }
 
     repeat {
         int k = 5;
@@ -146,4 +148,24 @@ for (int i = 0; i < 10; i = i+1) {
         } endif
     } until (true);
 
+}
+
+if (true) {
+    int k = 5;
+} else if (true) {
+    int k = 5;
+} else if (false) {
+    int k = 5;
+} else {
+    int k = 5;
+}
+
+if (true) {
+    int k = 5;
+} endif
+
+if (true) {
+    int k = 5;
+} else {
+    int k = 5;
 }

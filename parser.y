@@ -28,7 +28,7 @@
 %token <integer> INT
 %token <floatval> FLOAT
 %token <boolean> BOOL
-%token IF ENDIF ELSE WHILE FOR BREAK CONTINUE REPEAT UNTIL SWITCH CASE DEFAULT
+%token IF ENDIF ELSE ELSEIF WHILE FOR BREAK CONTINUE REPEAT UNTIL SWITCH CASE DEFAULT
 %token RETURN PRINT CONST EXIT
 %token INTTYPE FLOATTYPE BOOLTYPE VOID ENUM
 %token PLUS MINUS TIMES DIV MOD ASSIGN COMMA COLON
@@ -106,8 +106,14 @@ assignment : type ID ASSIGN expr
 declare : type ID 
         ;
 
+else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE else_if_stmt
+             | ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE
+             | {printf("empty else id stmt\n");}
+             ;
+
 if_stmt  : IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ENDIF
          | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE
+         | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE else_if_stmt
          ;
 
 while_stmt : WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE
@@ -178,4 +184,4 @@ int main (void) {
 	return yyparse ( );
 }
 
-void yyerror (char *s) {fprintf (stderr, "%s\n", s);} 
+void yyerror (char *s) {fprintf (stderr, "error: %s\n", s);} 
