@@ -54,6 +54,7 @@
 "true"|"false" {yylval.boolean = yytext[0]=="t"; return BOOL;}
 
 [ \t]+        {;}
+\/\/.*        {;}
 \n          {line_num++;}
 
 [0-9]+        {yylval.integer = atoi(yytext); return INT;}
