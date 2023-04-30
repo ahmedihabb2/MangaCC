@@ -112,6 +112,21 @@ if (true) {
 } endif
 
 
+int test() {
+    int k = 5;
+    if (true) {
+        int k = 5;
+    } endif
+
+    while (5>3) {
+        int k = 5;
+        if (true) {
+            int k = 5;
+        } endif
+    } 
+}
+
+
 for (int i = 0; i < 10; i = i+1) {
     int k = 5;
     if (true) {

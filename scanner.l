@@ -19,6 +19,7 @@
 "int"        {return INTTYPE;}
 "float"      {return FLOATTYPE;}
 "bool"       {return BOOLTYPE;}
+"string"     {return STRINGTYPE;}
 "void"       {return VOID;}
 "print"      {return PRINT;}
 "const"      {return CONST;}
@@ -58,9 +59,11 @@
 \/\/.*        {;}
 \n          {line_num++;}
 
-[0-9]+        {yylval.integer = atoi(yytext); return INT;}
-[0-9]+\.[0-9]+ {yylval.floatval = atof(yytext); return FLOAT;}
-[a-zA-Z_][a-zA-Z0-9_]* {yylval.id = strdup(yytext); return ID;}
+[0-9]+                  {yylval.integer = atoi(yytext); return INT;}
+[0-9]+\.[0-9]+          {yylval.floatval = atof(yytext); return FLOAT;}
+[a-zA-Z_][a-zA-Z0-9_]*  {yylval.id = strdup(yytext); return ID;}
+\".*\"                  {yylval.string = strdup(yytext); return STRING;}
+\'.*\'                    {yylval.string = strdup(yytext); return STRING;}
 
 .             {yyerror("Unexpected Token");}
 

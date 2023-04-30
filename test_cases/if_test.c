@@ -50,12 +50,12 @@ if (a and b) {
 } endif
 
 
-if (!(a or b)) {
+if (not (a or b)) {
     int k = 5;
 } endif
 
 
-if (!(a or b)) {
+if (not (a or b)) {
     int k = 5;
 } endif
 

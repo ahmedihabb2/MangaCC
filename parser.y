@@ -22,15 +22,17 @@
     float floatval;
     int boolean;
     char *id;
+    char *string;
 }
 %start program
 %token <id> ID
 %token <integer> INT
 %token <floatval> FLOAT
 %token <boolean> BOOL
+%token <string> STRING
 %token IF ENDIF ELSE ELSEIF WHILE FOR BREAK CONTINUE REPEAT UNTIL SWITCH CASE DEFAULT
 %token RETURN PRINT CONST EXIT
-%token INTTYPE FLOATTYPE BOOLTYPE VOID ENUM
+%token INTTYPE FLOATTYPE BOOLTYPE STRINGTYPE VOID ENUM 
 %token PLUS MINUS TIMES DIV MOD ASSIGN COMMA COLON
 %token LT GT EQ NE LE GE AND OR NOT XOR
 %token LPAREN RPAREN LBRACE RBRACE SEMI 
@@ -59,7 +61,6 @@ stmt    : expr SEMI {printf("%d %s" , line_num , "expr\n");}
         | repeat_stmt {printf("%d %s" , line_num , "repeat\n");}
         | print_stmt SEMI {printf("%d %s" , line_num , "print\n");}
         | for_stmt {printf("%d %s" , line_num , "for\n");}
-        | function_stmt {printf("%d %s" , line_num , "function\n");}
         | switch_stmt {printf("%d %s" , line_num , "switch\n");}
         | break_stmt SEMI {printf("%d %s" , line_num , "break\n");}
         | block_stmt {printf("%d %s" , line_num , "block\n");}
@@ -71,8 +72,14 @@ stmt    : expr SEMI {printf("%d %s" , line_num , "expr\n");}
         ;
 
 stmt_list : stmt stmt_list 
+          | function_stmt stmt_list
           | stmt
           | {printf("%d %s" , line_num , "empty stmt list\n");}
+          ;
+
+body_stmt_list : stmt body_stmt_list 
+          | stmt
+          | {printf("%d %s" , line_num , "empty body stmt list\n");}
           ;
 
 
@@ -96,6 +103,7 @@ expr    : expr PLUS expr
         | INT
         | FLOAT
         | BOOL
+        | STRING
         | ID
         ;
 
@@ -106,30 +114,31 @@ assignment : type ID ASSIGN expr
 declare : type ID 
         ;
 
-else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE else_if_stmt
-             | else_if_stmt ELSE LBRACE stmt_list RBRACE
+else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE else_if_stmt
+             | else_if_stmt ELSE LBRACE body_stmt_list RBRACE
              | {printf("%d %s" , line_num , "empty else if stmt\n");}
              ;
 
-if_stmt  : IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ENDIF
-         | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE
-         | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSEIF LPAREN expr RPAREN LBRACE stmt_list RBRACE else_if_stmt
+if_stmt  : IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ENDIF
+         | IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ELSE LBRACE body_stmt_list RBRACE
+         | IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ELSEIF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE else_if_stmt
          ;
 
-while_stmt : WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE
+while_stmt : WHILE LPAREN expr RPAREN LBRACE body_stmt_list RBRACE
            ;
            
-for_stmt : FOR LPAREN assignment SEMI expr SEMI assignment RPAREN LBRACE stmt_list RBRACE
+for_stmt : FOR LPAREN assignment SEMI expr SEMI assignment RPAREN LBRACE body_stmt_list RBRACE
             ;
 
-repeat_stmt : REPEAT LBRACE stmt_list RBRACE UNTIL LPAREN expr RPAREN SEMI
+repeat_stmt : REPEAT LBRACE body_stmt_list RBRACE UNTIL LPAREN expr RPAREN SEMI
             ;
         
-print_stmt : PRINT LPAREN expr RPAREN
+print_stmt : PRINT LPAREN expr RPAREN 
 
 type : INTTYPE
      | FLOATTYPE
      | BOOLTYPE
+     | STRINGTYPE
      | VOID
      | ENUM
      ;
@@ -144,7 +153,7 @@ param_call : | ID COMMA param_call
              | {printf("empty param call list\n");}
              ;
 
-function_stmt : type ID LPAREN param RPAREN LBRACE stmt_list RBRACE 
+function_stmt : type ID LPAREN param RPAREN LBRACE body_stmt_list RBRACE {printf("%d %s" , line_num , "function\n");}
               ;
 
 func_call_stmt : ID LPAREN param_call RPAREN
@@ -157,13 +166,13 @@ break_stmt : BREAK
            | {printf("empty break statement\n");}
            ;
 
-case_stmt :   CASE expr COLON stmt_list case_stmt
-            | CASE expr COLON stmt_list  
-            | DEFAULT COLON stmt_list  
+case_stmt :   CASE expr COLON body_stmt_list case_stmt
+            | CASE expr COLON body_stmt_list  
+            | DEFAULT COLON body_stmt_list  
             | {printf("empty case statement\n");}
             ;
 
-block_stmt : LBRACE stmt_list RBRACE
+block_stmt : LBRACE body_stmt_list RBRACE
            ;
 
 enum_body : ID COMMA enum_body

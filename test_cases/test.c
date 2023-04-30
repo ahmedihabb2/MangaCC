@@ -56,6 +56,10 @@ add(a, b);
 add();
 int y = add(a, b) ;
 y = add(a, b) ;
-
+string s = "hello world" ;
+string c = 'w';
+string d = "w" * "w";
 void main () {
+  print("El3ankabot el nono");
+  print('c');
 }
