@@ -107,11 +107,17 @@ expr    : expr PLUS expr
         | ID
         ;
 
+enum_val : ID
+         | INT
+         ;
+
 assignment : type ID ASSIGN expr
               | ID ASSIGN expr
               | CONST type ID ASSIGN expr
+              | ENUM ID ID ASSIGN enum_val
            ;
 declare : type ID 
+        | ENUM ID ID 
         ;
 
 else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE else_if_stmt
@@ -139,7 +145,6 @@ type : INTTYPE
      | FLOATTYPE
      | BOOLTYPE
      | STRINGTYPE
-     | VOID
      | ENUM
      ;
 
@@ -154,6 +159,7 @@ param_call : | ID COMMA param_call
              ;
 
 function_stmt : type ID LPAREN param RPAREN LBRACE body_stmt_list RBRACE {printf("%d %s" , line_num , "function\n");}
+              | VOID ID LPAREN param RPAREN LBRACE body_stmt_list RBRACE {printf("%d %s" , line_num , "function\n");}
               ;
 
 func_call_stmt : ID LPAREN param_call RPAREN
