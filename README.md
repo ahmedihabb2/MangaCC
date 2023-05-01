@@ -140,6 +140,16 @@
   enum Color c = RED;
   ```
 
+## How to run
 
+- There is a script named **build.sh** that generates the parser and lexer and takes test file from you as input argurmnt.
 
+- You can run the script by typing the following command in the terminal:
 
+  ```
+  ./build.sh test_cases/if_test.c
+  ```
+
+- Note: the test file should be in the test_cases folder.
+
+- It will print the tokens with its line number.
