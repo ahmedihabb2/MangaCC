@@ -153,3 +153,24 @@
 - Note: the test file should be in the test_cases folder.
 
 - It will print the tokens with its line number.
+
+
+## To-Do
+
+- Type checking 
+
+- Variable usage before declaration
+
+- Unused variables
+
+- Warning if the if statement condition is always false
+
+- The two operands for logical operators must be boolean
+
+- expression actions
+
+- const & enum handling
+
+- iterations & functions handling
+
+- switch and if statements handling
