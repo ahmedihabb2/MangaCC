@@ -1,19 +1,27 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include <stack>
     void yyerror (char *s);
-    struct SymbolTable{
-        char *name;
-        char *type;
-        char *value;
-        int line;
-    };
 
-    extern int line_num ;
+    #define HASH_TABLE_SIZE 1024
+    typedef struct symbol {
+        char* name;
+        int type;
+        int value;
+        int line_num;
+        int scope;
+        struct symbol* next;
+    } symbol;
 
-    char* getSymbol(char *name);
-    void setSymbol(char *name, char *type, char *value, int line);
-    struct SymbolTable symbolTable[10000];
+    std::stack<symbol*> scope_stack;
+    symbol* hash_table[HASH_TABLE_SIZE];
+
+
+    void insert_symbol(char* name, int type, int value);
+    symbol* lookup_symbol(char* name);
+    void enter_scope();
+    void leave_scope();
     
 %}
 
@@ -193,6 +201,52 @@ return_stmt : RETURN expr
             ;
 
 %%
+
+
+unsigned int hash(char *name){
+        unsigned int hash = 0;
+        // The hash value is the sum of the ASCII values of each character in the string 
+        // Multiplied by a prime number
+
+        for(int i = 0; i < strlen(name); i++){
+                hash_value  = hash_value * 31 + name[i];
+        }
+        return hash % HASH_TABLE_SIZE;
+}
+
+void insert_symbol(char *name, int type, int value, int line_num){
+        int hash_value = hash(name);
+        // Check if another symbol has same name
+        symbol* s = hash_table[hash_value];
+        while(s != NULL){
+                if(strcmp(s->name, name) == 0){
+                        printf("Error: Symbol %s already exists at line %d \n", name , s->line_num);
+                        exit(1);
+                }
+                s = s->next;
+        }
+
+        symbol* new_symbol = (symbol*)malloc(sizeof(symbol));
+        new_symbol->name = strdup(name);
+        new_symbol->type = type;
+        new_symbol->value = value;
+        new_symbol->line_num = line_num;
+        new_symbol->next = hash_table[hash_value]; 
+        hash_table[hash_value] = new_symbol;
+   
+}
+
+symbol *lookup_symbol(char *name){
+        int hash_value = hash(name);
+        symbol* s = hash_table[hash_value];
+        while(s != NULL){
+                if(strcmp(s->name, name) == 0){
+                        return s;
+                }
+                s = s->next;
+        }
+        return NULL;
+}
 
 int main (void) {
 
