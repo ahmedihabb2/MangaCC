@@ -1,5 +1,5 @@
 int x;
-const float y = 5.0;
+// const float y = 5.0;
 string s = "hello world";
 string c = 'w';
 string b = 'Test hi';
@@ -27,4 +27,4 @@ enum color
     blue
 };
 
-enum color c1 = red ;
+// enum color c1 = red ;
