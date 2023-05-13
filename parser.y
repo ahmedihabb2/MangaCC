@@ -107,9 +107,9 @@
 program :  stmt_list
         ;
 
-stmt    : expr SEMI {printf("%d %s" , line_num , "expr\n");}
+stmt    : expr SEMI // {printf("%d %s" , line_num , "expr\n");}
         | if_stmt  {printf("%d %s" , line_num , "if\n");}
-        | assignment SEMI {printf("%d %s" , line_num , "assignment\n");}
+        | assignment SEMI // {printf("%d %s" , line_num , "assignment\n");}
         | while_stmt {printf("%d %s" , line_num , "while\n");}
         | repeat_stmt {printf("%d %s" , line_num , "repeat\n");}
         | print_stmt SEMI // {printf("%d %s" , line_num , "print\n");}
@@ -120,7 +120,7 @@ stmt    : expr SEMI {printf("%d %s" , line_num , "expr\n");}
         | enum_stmt SEMI {printf("%d %s" , line_num , "enum\n");}
         | return_stmt SEMI {printf("%d %s" , line_num , "return\n");}
         | CONTINUE SEMI {printf("%d %s" , line_num , "continue\n");}
-        | declare SEMI { printf("%d %s" , line_num , "declare\n");}
+        | declare SEMI // { printf("%d %s" , line_num , "declare\n");}
         | func_call_stmt SEMI {printf("%d %s" , line_num , "function call\n");}
         ;
 
@@ -153,9 +153,9 @@ expr    : expr PLUS expr {$$ = "$1 + $3";}
         | NOT expr      {$$ = "!$2";}
         | LPAREN expr RPAREN    {$$ = "$2";}
         | func_call_stmt        {$$ = "$1";}
-        | INT                {char str_val[100]; sprintf(str_val, "%d", $1); $$ = str_val;}
-        | FLOAT             {char str_val[100]; sprintf(str_val, "%.2f", $1); $$ = str_val;}
-        | BOOL            {char str_val[100]; sprintf(str_val, "%d", $1); $$ = str_val;}
+        | INT                {$$ = "int";}
+        | FLOAT             {$$ = "float";}
+        | BOOL            {$$ = "bool";}
         | STRING        {$$ = $1;}
         | ID            {$$ = get_symbol(stack, $1)->value;}
         ;
@@ -166,19 +166,15 @@ enum_val : ID
 
 assignment : type ID ASSIGN expr {
                 add_symbol(stack, $2, $1, $4, line_num);
-                // printf("%d value after: %s\n", line_num, get_symbol(stack, $2)->value);
                 }
               | ID ASSIGN expr {
-                printf("in rule %i, name: %s, address: %x, value: %s\n",line_num, get_symbol(stack, $1)->name, get_symbol(stack, $1), get_symbol(stack, $1)->value);
                 get_symbol(stack, $1)->value = $3;
-                // printf("%d value after: %s\n", line_num, get_symbol(stack, $1)->value);
                 }
               | CONST type ID ASSIGN expr
               | ENUM ID ID ASSIGN enum_val
            ;
 declare : type ID {
                 add_symbol(stack, $2, $1, 0, line_num);
-                // printf("%d value after: %s\n", line_num, get_symbol(stack, $2)->value);
                 }
         | ENUM ID ID 
         ;
@@ -310,7 +306,7 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     for (int i = stack->num_tables - 1; i >= 0; i--) {
         SymbolTable *table = stack->tables[i];
         for (int j = 0; j < table->num_symbols; j++) {
-                printf("line: %i, table: %i, name: %s, address: %x, value: %s\n", line_num, i, table->symbols[j].name, &table->symbols[j], table->symbols[j].value);
+        // printf("line: %i, table: %i, name: %s, address: %x, value: %s\n", line_num, i, table->symbols[j].name, &table->symbols[j], table->symbols[j].value);
             if (strcmp(table->symbols[j].name, name) == 0) {
                 return &table->symbols[j];
             }
