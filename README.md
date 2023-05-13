@@ -157,20 +157,20 @@
 
 ## To-Do
 
-- Type checking 
+- Type checking => ihab
 
-- Variable usage before declaration
+- Variable usage before declaration => ihab
 
-- Unused variables
+- Unused variables => ihab
 
 - Warning if the if statement condition is always false
 
 - The two operands for logical operators must be boolean
 
-- expression actions
+- expression actions => weaam
 
 - const & enum handling
 
-- iterations & functions handling
+- iterations & functions handling => weaam
 
 - switch and if statements handling
