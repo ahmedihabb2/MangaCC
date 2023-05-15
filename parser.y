@@ -153,9 +153,9 @@ expr    : expr PLUS expr {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($
         | NOT expr      {char str_val[20] = ""; sprintf(str_val, "%d", !atof($2)); $$ = str_val;}
         | LPAREN expr RPAREN    {$$ = $2;}
         | func_call_stmt        {$$ = "$1";}
-        | INT                {char str_val[20] = ""; sprintf(str_val, "%d", $1); $$ = str_val;}
-        | FLOAT             {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); $$ = str_val;}
-        | BOOL            {char str_val[20] = ""; sprintf(str_val, "%d", $1); $$ = str_val;}
+        | INT                {$$ = "int";}
+        | FLOAT             {$$ = "float";}
+        | BOOL            {$$ = "bool";}
         | STRING        {$$ = $1;}
         | ID            {$$ = get_symbol(stack, $1)->value;}
         ;
@@ -210,8 +210,8 @@ type : INTTYPE {$$ = INT_ENUM;}
      | ENUM {$$ = ENUM_ENUM;}
      ;
 
-param : type ID
-      | type ID COMMA param   
+param : type ID {add_symbol(stack, $2, $1, 0, line_num);}
+      | type ID COMMA param {add_symbol(stack, $2, $1, 0, line_num);}
       |  {printf("%d %s" , line_num , "empty param list\n");}
       ;
 
@@ -220,8 +220,8 @@ param_call : | ID COMMA param_call
              | {printf("empty param call list\n");}
              ;
 
-function_stmt : type ID LPAREN param RPAREN LBRACE body_stmt_list RBRACE {printf("%d %s" , line_num , "function\n");}
-              | VOID ID LPAREN param RPAREN LBRACE body_stmt_list RBRACE {printf("%d %s" , line_num , "function\n");}
+function_stmt : type ID LPAREN {printf("start new func scope %d\n", line_num); push_symbol_table(stack, create_symbol_table());} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
+              | VOID ID LPAREN {printf("start new func scope %d\n", line_num); push_symbol_table(stack, create_symbol_table());} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
               ;
 
 func_call_stmt : ID LPAREN param_call RPAREN
@@ -240,7 +240,7 @@ case_stmt :   CASE expr COLON body_stmt_list case_stmt
             | {printf("empty case statement\n");}
             ;
 
-block_stmt : LBRACE { SymbolTable *table = create_symbol_table(); push_symbol_table(stack, table);} body_stmt_list RBRACE {pop_symbol_table(stack);}
+block_stmt : LBRACE { push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
 
 enum_body : ID COMMA enum_body
@@ -319,7 +319,7 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     for (int i = stack->num_tables - 1; i >= 0; i--) {
         SymbolTable *table = stack->tables[i];
         for (int j = 0; j < table->num_symbols; j++) {
-        // printf("line: %i, table: %i, name: %s, address: %x, value: %s\n", line_num, i, table->symbols[j].name, &table->symbols[j], table->symbols[j].value);
+            // printf("line: %i, table: %i, name: %s, address: %x, value: %s\n", line_num, i, table->symbols[j].name, &table->symbols[j], table->symbols[j].value);
             if (strcmp(table->symbols[j].name, name) == 0) {
                 return &table->symbols[j];
             }
