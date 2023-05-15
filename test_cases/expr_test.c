@@ -3,6 +3,11 @@ float y = 5.0;
 
 print(x);
 print(y);
+
+x%y;
+print(x);
+print(y);
+
 print(x == y);
 print(x != y);
 print(x > y);
@@ -16,8 +21,10 @@ print(x+y);
 print(x-y);
 print(x*y);
 print(x/y);
-print(x%y);
-
+x = (x + 8);
+print(x);
+print(x%y); // not handled yet
+print(x);
 
 
 bool b = true;
@@ -44,4 +51,4 @@ print(b xor d);
 int t = 3;
 int f = 5;
 
-print(t + f);
+print(t + f); // not handled yet
