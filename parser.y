@@ -153,9 +153,9 @@ expr    : expr PLUS expr {$$ = "$1 + $3";}
         | NOT expr      {$$ = "!$2";}
         | LPAREN expr RPAREN    {$$ = "$2";}
         | func_call_stmt        {$$ = "$1";}
-        | INT                {$$ = "int";}
-        | FLOAT             {$$ = "float";}
-        | BOOL            {$$ = "bool";}
+        | INT                {char str_val[20] = ""; sprintf(str_val, "%d", $1); $$ = str_val;}
+        | FLOAT             {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); $$ = str_val;}
+        | BOOL            {char str_val[20] = ""; sprintf(str_val, "%d", $1); $$ = str_val;}
         | STRING        {$$ = $1;}
         | ID            {$$ = get_symbol(stack, $1)->value;}
         ;
@@ -297,7 +297,20 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
         }
     }
 
-    Symbol symbol = {name, type, value, line};
+    // here make a new copy instance from the value to avoid sharing the same pointer
+    char* val_copy = NULL;
+    if (value != NULL) {
+        val_copy = malloc(strlen(value) + 1);
+        if (val_copy != NULL) {
+            strcpy(val_copy, value);
+        } else {
+            printf("Error: failed to allocate memory for value copy\n");
+            return;
+        }
+    }
+
+    Symbol symbol = {name, type, val_copy, line};
+
     table->symbols[table->num_symbols++] = symbol;
 }
 

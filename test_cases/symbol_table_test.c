@@ -16,6 +16,7 @@ print(x);
         }
     print(x);
 }
-
+x = 2;
+y = 6;
 print(x);
 print(y);
