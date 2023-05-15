@@ -136,22 +136,22 @@ body_stmt_list : stmt body_stmt_list
           ;
 
 
-expr    : expr PLUS expr {$$ = "$1 + $3";}
-        | expr MINUS expr {$$ = "$1 - $3";}
-        | expr TIMES expr       {$$ = "$1 * $3";}
-        | expr DIV expr        {$$ = "$1 / $3";}
-        | expr MOD expr       {$$ = "$1  $3";}
-        | expr AND expr      {$$ = "$1 && $3";}
-        | expr OR expr     {$$ = "$1 || $3";}
-        | expr EQ expr          {$$ = "$1 == $3";}
-        | expr NE expr        {$$ = "$1 != $3";}
-        | expr LT expr      {$$ = "$1 < $3";}
-        | expr GT expr   {$$ = "$1 > $3";}
-        | expr LE expr  {$$ = "$1 <= $3";}
-        | expr GE expr  {$$ = "$1 >= $3";}
-        | expr XOR expr {$$ = "$1 ^ $3";}
-        | NOT expr      {$$ = "!$2";}
-        | LPAREN expr RPAREN    {$$ = "$2";}
+expr    : expr PLUS expr {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) + atof($3)); $$ = str_val;}
+        | expr MINUS expr {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) - atof($3)); $$ = str_val;}
+        | expr TIMES expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) * atof($3)); $$ = str_val;}
+        | expr DIV expr        {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) / atof($3)); $$ = str_val;}
+        | expr MOD expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) + atof($3)); $$ = str_val;}
+        | expr AND expr      {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) && atof($3)); $$ = str_val;}
+        | expr OR expr     {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) || atof($3)); $$ = str_val;}
+        | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) == atof($3)); $$ = str_val;}
+        | expr NE expr        {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) != atof($3)); $$ = str_val;}
+        | expr LT expr      {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) < atof($3)); $$ = str_val;}
+        | expr GT expr   {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) > atof($3)); $$ = str_val;}
+        | expr LE expr  {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) <= atof($3)); $$ = str_val;}
+        | expr GE expr  {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) >= atof($3)); $$ = str_val;}
+        | expr XOR expr {char str_val[20] = ""; sprintf(str_val, "%d", atoi($1) ^ atoi($3)); $$ = str_val;}
+        | NOT expr      {char str_val[20] = ""; sprintf(str_val, "%d", !atof($2)); $$ = str_val;}
+        | LPAREN expr RPAREN    {$$ = $2;}
         | func_call_stmt        {$$ = "$1";}
         | INT                {char str_val[20] = ""; sprintf(str_val, "%d", $1); $$ = str_val;}
         | FLOAT             {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); $$ = str_val;}
