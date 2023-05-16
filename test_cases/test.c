@@ -1,65 +1,47 @@
-if ( a > 5 ) {
-  int k = a + b ;
-}else {
-   k = a - b ;
+int x;
+print(x);
+int y = 5;
+print(y);
+
+x = y;
+print(x);
+
+{
+    float x = 8.3;
+    print(x);
+        {
+            print(x);
+            int x = 5;
+            print(x);
+        }
+    print(x);
 }
+x = true;
+y = 6;
+print(x);
+print(y);
 
-while ( a > 5 ) {
-  int k = a + b ;
 
-  if ( k > 10 ) {
-    k = k + 1 ;
-  }endif
-  continue;
+void main()
+{
+    int x = 5;
+    print(x);
+    {
+        int x = 6.6;
+        print(x);
+    }
+    print(x);
 }
+print(x);
+print(y);
 
-for ( int i = 0 ; i < 10 ; i = i+ 1) {
-  int k = a + b ;
-
-  if ( k > 10 ) {
-    k = k + 1 ;
-  }endif
-  break;
-
+int func(float x, float y)
+{
+    x = 5.6;
+    y = false;
+    print(x);
+    print(y);
+    return x + y;
 }
-
-enum color { red, green, blue };
-int x  ; 
-
-
-int add ( int a, int b ) {
-  const int x = 5 ;
-  return a + b ;
-}
-
-repeat {
-  int k = a + b ;
-
-  if ( k > 10 ) {
-    k = k + 1 ;
-  }endif
-  break;
-} until ( a > 5 ) ;
-
-switch ( a ) {
-  case 1: 
-    int k = a + b ;
-    break;
-  case 2:
-    int k = a + b ;
-    break;
-  default:
-    int k = a + b ;
-    break;
-}
-add(a, b);
-add();
-int y = add(a, b) ;
-y = add(a, b) ;
-string s = "hello world" ;
-string c = 'w';
-string d = "w" * "w";
-void main () {
-  print("El3ankabot el nono");
-  print('c');
-}
+print(x);
+print(y);

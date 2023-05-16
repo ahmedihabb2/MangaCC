@@ -67,7 +67,9 @@
         Symbol *get_symbol(SymbolTableStack *stack, char *name);
         void push_symbol_table(SymbolTableStack *stack, SymbolTable *table);
         void pop_symbol_table(SymbolTableStack *stack);
-        char* copy_value(char* value); // copy the value to a new memory address
+        char *copy_value(char* value); // copy the value to a new memory address
+        void* copy_void(void* value); // copy the value to a new memory address
+        Symbol *void_to_symbol(void *v) {return (Symbol*)v;} 
         
         SymbolTableStack *stack;
 
@@ -82,6 +84,7 @@
     char *id;
     char *string;
     void *voidval;
+    void *symbolval;
 }
 %start program
 %token <id> ID
@@ -95,7 +98,7 @@
 %token PLUS MINUS TIMES DIV MOD ASSIGN COMMA COLON
 %token LT GT EQ NE LE GE AND OR NOT XOR
 %token LPAREN RPAREN LBRACE RBRACE SEMI 
-%type <string> expr
+%type <symbolval> expr
 %type <integer> type
 %type <voidval> VOID
 
@@ -143,28 +146,28 @@ body_stmt_list : stmt body_stmt_list
           ;
 
 
-expr    : expr PLUS expr        {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) + atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr MINUS expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) - atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr TIMES expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) * atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr DIV expr         {char str_val[20] = ""; sprintf(str_val, "%.2f", atof($1) / atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr MOD expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi($1) % atoi($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr AND expr         {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) && atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr OR expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) || atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) == atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr NE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) != atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr LT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) < atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr GT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) > atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr LE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) <= atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr GE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof($1) >= atof($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | expr XOR expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi($1) ^ atoi($3)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof($2)); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | LPAREN expr RPAREN    {$$ = $2;}
-        | func_call_stmt        {$$ = "$1";}
-        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); $$ = val_copy;}
-        | STRING                {$$ = $1;}
-        | ID                    {char* val_copy = copy_value(get_symbol(stack, $1)->value); $$ = val_copy;}
+expr    : expr PLUS expr        {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) + atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr MINUS expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) - atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr TIMES expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) * atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr DIV expr         {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) / atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr MOD expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) % atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr AND expr         {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr OR expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr NE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr LT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr GT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr LE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr GE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr XOR expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | LPAREN expr RPAREN    {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}
+        | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}
+        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = v;}
+        | ID                    {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
         ;
 
 enum_val : ID
@@ -172,14 +175,18 @@ enum_val : ID
          ;
 
 assignment : type ID ASSIGN expr {
-                add_symbol(stack, $2, $1, $4, line_num, false, false, false);
+                Symbol* s = void_to_symbol($4);
+                add_symbol(stack, $2, $1, s->value, line_num, false, false, false);
                 }
               | ID ASSIGN expr {
-                get_symbol(stack, $1)->value = $3;
+                Symbol* s = void_to_symbol($3);
+                Symbol* lhs_symbol = get_symbol(stack, $1);
+                lhs_symbol->value = copy_value(s->value);
                 }
               | CONST type ID ASSIGN expr
               | ENUM ID ID ASSIGN enum_val
            ;
+
 declare : type ID {
                 add_symbol(stack, $2, $1, 0, line_num, false, false, false);
                 }
@@ -206,7 +213,8 @@ repeat_stmt : REPEAT LBRACE body_stmt_list RBRACE UNTIL LPAREN expr RPAREN SEMI
             ;
         
 print_stmt : PRINT LPAREN expr RPAREN {
-        printf("print %d: %s\n" , line_num , $3);
+        Symbol* s = void_to_symbol($3);
+        printf("print %d: %s\n" , line_num , s->value);
         }
         ;
 
@@ -333,6 +341,19 @@ char* copy_value(char* value) {
     }
     return val_copy;
 }
+
+void* copy_void(void* value) {
+    size_t size = sizeof(Symbol);
+
+    // Allocate memory for the copy
+    void* copy = malloc(size);
+
+    // Copy the data
+    memcpy(copy, value, size);
+
+    return copy;
+}
+
 
 Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     // search for symbol in the stack of tables, starting from the top

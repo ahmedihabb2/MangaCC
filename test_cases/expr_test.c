@@ -1,5 +1,5 @@
 int x = 5;
-float y = 5.0;
+float y = 1.0;
 
 print(x);
 print(y);
@@ -23,7 +23,7 @@ print(x*y);
 print(x/y);
 x = (x + 8);
 print(x);
-print(x%y); // not handled yet
+print(x%5); // not handled yet
 print(x);
 
 
