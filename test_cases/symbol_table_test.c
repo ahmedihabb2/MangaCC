@@ -35,7 +35,7 @@ void main()
 print(x);
 print(y);
 
-void func(float x, float y)
+int func(float x, float y)
 {
     x = 5.6;
     y = false;
