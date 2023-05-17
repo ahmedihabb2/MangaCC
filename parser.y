@@ -180,10 +180,13 @@ assignment : type ID ASSIGN expr {
                 }
               | ID ASSIGN expr {
                 Symbol* s = void_to_symbol($3);
-                Symbol* lhs_symbol = get_symbol(stack, $1);
+                Symbol* lhs_symbol = get_symbol(stack, $1);                
                 lhs_symbol->value = copy_value(s->value);
                 }
-              | CONST type ID ASSIGN expr
+              | CONST type ID ASSIGN expr {
+                Symbol* s = void_to_symbol($5);
+                add_symbol(stack, $3, $2, s->value, line_num, true, false, false);
+              }
               | ENUM ID ID ASSIGN enum_val
            ;
 
