@@ -163,14 +163,12 @@
 
 - Unused variables => ihab
 
-- Warning if the if statement condition is always false
+- Warning if the if statement condition is always false (Anwar)
 
-- The two operands for logical operators must be boolean
+- expression actions => weaam (Done)
 
-- expression actions => weaam
-
-- const & enum handling
+- const & enum handling (Anwar)
 
 - iterations & functions handling => weaam
 
-- switch and if statements handling
+- switch and if statements handling (Anwar)
