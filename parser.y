@@ -70,6 +70,7 @@
         char *copy_value(char* value); // copy the value to a new memory address
         void* copy_void(void* value); // copy the value to a new memory address
         Symbol *void_to_symbol(void *v) {return (Symbol*)v;} 
+        void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const);
         
         SymbolTableStack *stack;
 
@@ -176,11 +177,13 @@ enum_val : ID
 
 assignment : type ID ASSIGN expr {
                 Symbol* s = void_to_symbol($4);
+                //check_assignment_types($1, s, line_num,0);
                 add_symbol(stack, $2, $1, s->value, line_num, false, false, false);
                 }
               | ID ASSIGN expr {
                 Symbol* s = void_to_symbol($3);
                 Symbol* lhs_symbol = get_symbol(stack, $1);
+                //check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
                 lhs_symbol->value = copy_value(s->value);
                 }
               | CONST type ID ASSIGN expr
@@ -327,6 +330,23 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
 
     table->symbols[table->num_symbols++] = symbol;
 }
+
+
+void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const)
+{
+    if(is_const)
+    {
+        printf("Error: cannot assign a value to const at line %d\n", line_num);
+        exit(1);
+    }
+    if (statement_type != s->type)
+    {
+        printf("Error: type mismatch in assignment at line %d\n", line_num);
+        exit(1);
+    } 
+    return ;
+}
+
 
 char* copy_value(char* value) {
     char* val_copy = NULL;

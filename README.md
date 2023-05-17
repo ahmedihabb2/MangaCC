@@ -157,7 +157,7 @@
 
 ## To-Do
 
-- Type checking => ihab
+- Type checking => ihab (Done)
 
 - Variable usage before declaration => ihab
 

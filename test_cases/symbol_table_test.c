@@ -1,4 +1,8 @@
 int x;
+int ahmed = 1;
+// const int ahmed = 5;
+print(x);
+ahmed = 6;
 print(x);
 int y = 5;
 print(y);
