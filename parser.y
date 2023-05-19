@@ -2,6 +2,7 @@
         #include <stdio.h>
         #include <stdlib.h>
         #include <string.h>
+        #include <math.h>
         void yyerror (char *s);
 
 
@@ -76,6 +77,9 @@
         // operrator functions
         Symbol add_op(void *a, void *b);
         Symbol sub_op(void *a, void *b);
+        Symbol mul_op(void *a, void *b);
+        Symbol div_op(void *a, void *b);
+        Symbol mod_op(void *a, void *b);
 
 
         // Global variables
@@ -157,9 +161,9 @@ body_stmt_list : stmt body_stmt_list
 
 expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));}
         | expr MINUS expr       {Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));}
-        | expr TIMES expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) * atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr DIV expr         {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) / atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr MOD expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) % atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr TIMES expr       {Symbol s = mul_op($1, $3); $$ = copy_void(((void*)&s));}
+        | expr DIV expr         {Symbol s = div_op($1, $3); $$ = copy_void(((void*)&s));}
+        | expr MOD expr         {Symbol s = mod_op($1, $3); $$ = copy_void(((void*)&s));}
         | expr AND expr         {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
         | expr OR expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
         | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
@@ -435,7 +439,7 @@ Symbol add_op(void *a, void *b) {
                         s.type = FLOAT_ENUM;
                 } else {
                         printf("Error: invalid types for addition\n");
-                        return;
+                        return s;
                 }
 
                 char* val_copy = copy_value(str_val);
@@ -479,7 +483,7 @@ Symbol sub_op(void *a, void *b) {
                         s.type = FLOAT_ENUM;
                 } else {
                         printf("Error: invalid types for subtraction\n");
-                        return;
+                        return s;
                 }
 
                 char* val_copy = copy_value(str_val);
@@ -487,6 +491,119 @@ Symbol sub_op(void *a, void *b) {
                 return s;
 }
 
+Symbol mul_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                float float_val1 = 0;
+                float float_val2 = 0;
+                if (s1->type == INT_ENUM)
+                        int_val1 = atoi(s1->value);
+                else if (s1->type == FLOAT_ENUM)
+                        float_val1 = atof(s1->value);
+
+                if (s2->type == INT_ENUM)
+                        int_val2 = atoi(s2->value);
+                else if (s2->type == FLOAT_ENUM)
+                        float_val2 = atof(s2->value);
+
+                // perform operation
+                if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%d", int_val1 * int_val2);
+                        s.type = INT_ENUM;
+                } else if (s1->type == INT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", int_val1 * float_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 * int_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 * float_val2);
+                        s.type = FLOAT_ENUM;
+                } else {
+                        printf("Error: invalid types for multiplication\n");
+                        return s;
+                }
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
+
+Symbol div_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                float float_val1 = 0;
+                float float_val2 = 0;
+                if (s1->type == INT_ENUM)
+                        int_val1 = atoi(s1->value);
+                else if (s1->type == FLOAT_ENUM)
+                        float_val1 = atof(s1->value);
+
+                if (s2->type == INT_ENUM)
+                        int_val2 = atoi(s2->value);
+                else if (s2->type == FLOAT_ENUM)
+                        float_val2 = atof(s2->value);
+
+                // perform operation
+                if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%d", int_val1 / int_val2);
+                        s.type = INT_ENUM;
+                } else if (s1->type == INT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", int_val1 / float_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 / int_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 / float_val2);
+                        s.type = FLOAT_ENUM;
+                } else {
+                        printf("Error: invalid types for division\n");
+                        return s;
+                }
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
+
+Symbol mod_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // check if one of the operands are float type and return error
+                if (s1->type == FLOAT_ENUM || s2->type == FLOAT_ENUM) {
+                        printf("Error: invalid types for modulo\n");
+                        return s;
+                }
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                int_val1 = atoi(s1->value);
+                int_val2 = atoi(s2->value);
+
+                sprintf(str_val, "%d", int_val1 % int_val2);
+                s.type = INT_ENUM;
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
 
 
 int main (void) {
