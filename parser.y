@@ -71,7 +71,15 @@
         void* copy_void(void* value); // copy the value to a new memory address
         Symbol *void_to_symbol(void *v) {return (Symbol*)v;} 
         void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const);
-        
+
+
+        // operrator functions
+        Symbol add_op(void *a, void *b);
+        Symbol sub_op(void *a, void *b);
+
+
+        // Global variables
+
         SymbolTableStack *stack;
 
         extern int line_num ;
@@ -147,8 +155,8 @@ body_stmt_list : stmt body_stmt_list
           ;
 
 
-expr    : expr PLUS expr        {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) + atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr MINUS expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) - atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));}
+        | expr MINUS expr       {Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));}
         | expr TIMES expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) * atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
         | expr DIV expr         {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) / atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
         | expr MOD expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) % atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
@@ -196,23 +204,23 @@ declare : type ID {
         | ENUM ID ID 
         ;
 
-else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE else_if_stmt
-             | else_if_stmt ELSE LBRACE body_stmt_list RBRACE
+else_if_stmt : ELSEIF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE  {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} else_if_stmt
+             | else_if_stmt ELSE LBRACE  {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
              | {printf("%d %s" , line_num , "empty else if stmt\n");}
              ;
 
-if_stmt  : IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ENDIF
-         | IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ELSE LBRACE body_stmt_list RBRACE
-         | IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ELSEIF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE else_if_stmt
+if_stmt  : IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE ENDIF {pop_symbol_table(stack);}
+         | IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} ELSE LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
+         | IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} ELSEIF LPAREN expr RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} else_if_stmt
          ;
 
-while_stmt : WHILE LPAREN expr RPAREN LBRACE body_stmt_list RBRACE
+while_stmt : WHILE LPAREN expr {Symbol *s = void_to_symbol($3); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
            
-for_stmt : FOR LPAREN assignment SEMI expr SEMI assignment RPAREN LBRACE body_stmt_list RBRACE
+for_stmt : FOR LPAREN assignment SEMI expr {Symbol *s = void_to_symbol($5); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num);} SEMI assignment RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
             ;
 
-repeat_stmt : REPEAT LBRACE body_stmt_list RBRACE UNTIL LPAREN expr RPAREN SEMI
+repeat_stmt : REPEAT LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);}  RPAREN SEMI
             ;
         
 print_stmt : PRINT LPAREN expr RPAREN {
@@ -391,6 +399,93 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     return NULL;
 }
 
+Symbol add_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                float float_val1 = 0;
+                float float_val2 = 0;
+                if (s1->type == INT_ENUM)
+                        int_val1 = atoi(s1->value);
+                else if (s1->type == FLOAT_ENUM)
+                        float_val1 = atof(s1->value);
+
+                if (s2->type == INT_ENUM)
+                        int_val2 = atoi(s2->value);
+                else if (s2->type == FLOAT_ENUM)
+                        float_val2 = atof(s2->value);
+
+                // perform operation
+                if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%d", int_val1 + int_val2);
+                        s.type = INT_ENUM;
+                } else if (s1->type == INT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", int_val1 + float_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 + int_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 + float_val2);
+                        s.type = FLOAT_ENUM;
+                } else {
+                        printf("Error: invalid types for addition\n");
+                        return;
+                }
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
+
+Symbol sub_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                float float_val1 = 0;
+                float float_val2 = 0;
+                if (s1->type == INT_ENUM)
+                        int_val1 = atoi(s1->value);
+                else if (s1->type == FLOAT_ENUM)
+                        float_val1 = atof(s1->value);
+
+                if (s2->type == INT_ENUM)
+                        int_val2 = atoi(s2->value);
+                else if (s2->type == FLOAT_ENUM)
+                        float_val2 = atof(s2->value);
+
+                // perform operation
+                if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%d", int_val1 - int_val2);
+                        s.type = INT_ENUM;
+                } else if (s1->type == INT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", int_val1 - float_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 - int_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 - float_val2);
+                        s.type = FLOAT_ENUM;
+                } else {
+                        printf("Error: invalid types for subtraction\n");
+                        return;
+                }
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
 
 
 
