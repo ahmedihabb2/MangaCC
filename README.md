@@ -165,8 +165,6 @@
 
 - Function call with wrong type of arguments 
 
-- Function call with wrong return type
-
 - Function call to function that is not declared
 
 - Unused variables => ihab

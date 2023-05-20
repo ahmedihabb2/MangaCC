@@ -6,6 +6,14 @@ while (x < y) {
     print("x is less than y");
 }
 
+void func(int z) {
+    print(z);
+    print("inside func");
+}
+
+// func();
+
+
 // print(x);
 // print(y);
 
