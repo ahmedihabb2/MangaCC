@@ -157,18 +157,26 @@
 
 ## To-Do
 
-- Type checking => ihab
+- Type checking => ihab (Done)
 
-- Variable usage before declaration => ihab
+- Variable usage before declaration => ihab (Done)
 
-- Unused variables => ihab
+- Function call with wrong number of arguments => weaam (Done) 
 
-- Warning if the if statement condition is always false (Anwar)
+- Function call with wrong type of arguments => weaam (Done) 
+
+- Function call to function that is not declared => weaam (Done)
+
+- Unused variables => ihab (Done)
+
+- Warning if the if statement condition is always false (Anwar) (Done)
 
 - expression actions => weaam (Done)
 
-- const & enum handling (Anwar)
+- const & enum handling (Anwar) (Done)
 
-- iterations & functions handling => weaam
+- iterations & functions handling => weaam (Done)
 
 - switch and if statements handling (Anwar)
+
+- Handle arguments with null values

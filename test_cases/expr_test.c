@@ -1,19 +1,32 @@
 int x = 5;
-float y = 1.0;
+int y = 3;
+// float y = 13.0;
 
-print(x);
-print(y);
+while (x < y) {
+    print("x is less than y");
+}
 
-x%y;
-print(x);
-print(y);
+int func(int z, float y, bool x, string s) {
+    print(z);
+    print("inside func");
+}
 
-print(x == y);
-print(x != y);
-print(x > y);
-print(x < y);
-print(x >= y);
-print(x <= y);
+x("44", 8.3, 3.6, "hello");
+
+
+// print(x);
+// print(y);
+
+// x%y;
+// print(x);
+// print(y);
+
+// print(x == y);
+// print(x != y);
+// print(x > y);
+// print(x < y);
+// print(x >= y);
+// print(x <= y);
 
 
 
@@ -21,9 +34,9 @@ print(x+y);
 print(x-y);
 print(x*y);
 print(x/y);
-x = (x + 8);
+x = (x + 9);
 print(x);
-print(x%5); // not handled yet
+print(x%y);
 print(x);
 
 

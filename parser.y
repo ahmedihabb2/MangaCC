@@ -2,6 +2,7 @@
         #include <stdio.h>
         #include <stdlib.h>
         #include <string.h>
+        #include <math.h>
         void yyerror (char *s);
 
 
@@ -9,6 +10,12 @@
         #define SYMBOL_MAX 1000
 
         typedef enum { false, true } bool;
+
+        typedef struct {
+        int *arguments_types;    // array of symbols
+        int num_arguments;    // number of symbols in the array
+        int max_arguments;    // maximum number of symbols that can be stored
+        } Arguments;
 
         // Datastructures for symbol table
         typedef struct {
@@ -19,6 +26,8 @@
         bool is_const;      // is the symbol a constant?
         bool is_enum;       // is the symbol an enum?
         bool is_func;       // is the symbol a function?
+        bool is_used;       // is the symbol used?
+        Arguments* arguments; // function arguments
         } Symbol;
 
         typedef struct {
@@ -55,26 +64,56 @@
         }
 
         SymbolTableStack *create_symbol_table_stack() {
+                printf("start create_symbol_table_stack\n");
                 SymbolTableStack *stack = malloc(sizeof(SymbolTableStack));
                 stack->tables = malloc(SYMBOL_TABLE_MAX * sizeof(SymbolTable *));
                 stack->num_tables = 0;
                 stack->max_tables = SYMBOL_TABLE_MAX;
+                printf("end create_symbol_table_stack\n");
                 return stack;
         }
 
+        Arguments *create_function_argumetns() {
+                printf("start create_function_argumetns\n");
+                Arguments *arguments = malloc(sizeof(Arguments));
+                arguments->arguments_types = malloc(25 * sizeof(int));
+                arguments->num_arguments = 0;
+                arguments->max_arguments = 25;
+                printf("end create_function_argumetns\n");
+                return arguments;
+        }
 
-        void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int line, bool is_const, bool is_enum, bool is_func);
+
+        void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int line, bool is_const, bool is_enum, bool is_func, bool is_used, Arguments* arguments);
         Symbol *get_symbol(SymbolTableStack *stack, char *name);
         void push_symbol_table(SymbolTableStack *stack, SymbolTable *table);
         void pop_symbol_table(SymbolTableStack *stack);
         char *copy_value(char* value); // copy the value to a new memory address
         void* copy_void(void* value); // copy the value to a new memory address
         Symbol *void_to_symbol(void *v) {return (Symbol*)v;} 
-        
+        void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const);
+        void add_arguments(Arguments *arguments, int type);
+        void assign_value(char * id  ,void *v);
+        void assign_value(char * id  ,void *v );
+        void check_unused_variables() ;
+
+
+        // operrator functions
+        Symbol add_op(void *a, void *b);
+        Symbol sub_op(void *a, void *b);
+        Symbol mul_op(void *a, void *b);
+        Symbol div_op(void *a, void *b);
+        Symbol mod_op(void *a, void *b);
+
+
+        // Global variables
+
         SymbolTableStack *stack;
 
         extern int line_num ;
         int enum_body_count = 0 ;
+        Arguments *last_declared_function = NULL;
+        int func_param_count = 0;
 %}
 
 %union{
@@ -145,28 +184,28 @@ body_stmt_list : stmt body_stmt_list
           ;
 
 
-expr    : expr PLUS expr        {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) + atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr MINUS expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) - atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr TIMES expr       {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) * atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr DIV expr         {char str_val[20] = ""; sprintf(str_val, "%.2f", atof(void_to_symbol($1)->value) / atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr MOD expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) % atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr AND expr         {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr OR expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr NE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr LT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr GT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr LE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr GE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr XOR expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | LPAREN expr RPAREN    {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}
-        | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}
-        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
-        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = v;}
-        | ID                    {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
+expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));}
+        | expr MINUS expr       {Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));}
+        | expr TIMES expr       {Symbol s = mul_op($1, $3); $$ = copy_void(((void*)&s));}
+        | expr DIV expr         {Symbol s = div_op($1, $3); $$ = copy_void(((void*)&s));}
+        | expr MOD expr         {Symbol s = mod_op($1, $3); $$ = copy_void(((void*)&s));}
+        | expr AND expr         {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr OR expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr NE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr LT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr GT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr LE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr GE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | expr XOR expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | LPAREN expr RPAREN    {Symbol s = *void_to_symbol($2); void *v= (void*)&s; $$ = copy_void(v);}
+        | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}  // TODO
+        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);check_always_false($1);}
+        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v;}
+        | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;printf("ID: %s Marked as Used \n", s->name); void *v= (void*)s; $$ = copy_void(v);}
         ;
 
 enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
@@ -175,48 +214,47 @@ enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_
 
 assignment : type ID ASSIGN expr {
                 Symbol* s = void_to_symbol($4);
-                add_symbol(stack, $2, $1, s->value, line_num, false, false, false);
+                check_assignment_types($1, s, line_num,0);
+                add_symbol(stack, $2, $1, s->value, line_num, false, false, false, false, NULL);
                 }
               | ID ASSIGN expr {
-                Symbol* s = void_to_symbol($3);
-                Symbol* lhs_symbol = get_symbol(stack, $1);                
-                lhs_symbol->value = copy_value(s->value);
+                assign_value($1,$3);
                 }
               | CONST type ID ASSIGN expr {
                 Symbol* s = void_to_symbol($5);
-                add_symbol(stack, $3, $2, s->value, line_num, true, false, false);
+                add_symbol(stack, $3, $2, s->value, line_num, true, false, false, false, NULL);
               }
               | ENUM ID ID ASSIGN enum_val {
                 Symbol* s = void_to_symbol($5);
-                add_symbol(stack, $3, INT_ENUM , s->value, line_num, false, true, false);
+                add_symbol(stack, $3, INT_ENUM , s->value, line_num, false, true, false, false, NULL);
               }
            ;
 
 declare : type ID {
-                add_symbol(stack, $2, $1, 0, line_num, false, false, false);
+                add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL);
                 }
         | ENUM ID ID {
-                add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false);
+                add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false, false, NULL);
                 }
         ;
 
-else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE else_if_stmt
-             | else_if_stmt ELSE LBRACE body_stmt_list RBRACE
+else_if_stmt : ELSEIF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE  {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} else_if_stmt
+             | else_if_stmt ELSE LBRACE  {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
              | {printf("%d %s" , line_num , "empty else if stmt\n");}
              ;
 
-if_stmt  : IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ENDIF
-         | IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ELSE LBRACE body_stmt_list RBRACE
-         | IF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE ELSEIF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE else_if_stmt
+if_stmt  : IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE ENDIF {pop_symbol_table(stack);}
+         | IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} ELSE LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
+         | IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} ELSEIF LPAREN expr RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} else_if_stmt
          ;
 
-while_stmt : WHILE LPAREN expr RPAREN LBRACE body_stmt_list RBRACE
+while_stmt : WHILE LPAREN expr {Symbol *s = void_to_symbol($3); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
            
-for_stmt : FOR LPAREN assignment SEMI expr SEMI assignment RPAREN LBRACE body_stmt_list RBRACE
+for_stmt : FOR LPAREN assignment SEMI expr {Symbol *s = void_to_symbol($5); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num);} SEMI assignment RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
             ;
 
-repeat_stmt : REPEAT LBRACE body_stmt_list RBRACE UNTIL LPAREN expr RPAREN SEMI
+repeat_stmt : REPEAT LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);}  RPAREN SEMI
             ;
         
 print_stmt : PRINT LPAREN expr RPAREN {
@@ -232,21 +270,70 @@ type : INTTYPE {$$ = INT_ENUM;}
      | ENUM {$$ = ENUM_ENUM;}
      ;
 
-param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false);}
-      | type ID COMMA param {add_symbol(stack, $2, $1, 0, line_num, false, false, false);}
+param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); printf("%s\n", s.name); add_arguments(last_declared_function, s.type);}
+      | type ID COMMA {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type);} param
       |  {printf("%d %s" , line_num , "empty param list\n");}
-      ;
+      ;     
 
-param_call : | ID COMMA param_call 
-             | ID
+param_call : | expr COMMA {
+                // Check if the ID exists in the symbol table
+                Symbol *s = void_to_symbol($1); 
+                if (s->type != last_declared_function->arguments_types[func_param_count]) {
+                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);
+                }
+                func_param_count++;
+                if (s == NULL) {
+                    printf("Error: %s is not defined in line %d\n", $1, line_num);
+                    exit(1);
+                } else {
+                        // Mark the symbol as used
+                        s->is_used = true;
+                        printf("ID: %s Marked as Used \n", s->name);
+                }} param_call 
+             | expr {
+                // Check if the ID exists in the symbol table
+                Symbol *s = void_to_symbol($1); 
+                if (s->type != last_declared_function->arguments_types[func_param_count]) {
+                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);
+                }
+                func_param_count++;
+                if (s == NULL) {
+                    printf("Error: %s is not defined in line %d\n", $1, line_num);
+                    exit(1);
+                } else {
+                        // Mark the symbol as used
+                        s->is_used = true;
+                        printf("ID: %s Marked as Used \n", s->name);
+                }
+             }
              | {printf("empty param call list\n");}
              ;
 
-function_stmt : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, true);} LPAREN {printf("start new func scope %d\n", line_num); push_symbol_table(stack, create_symbol_table());} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
-              | VOID ID {add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true);} LPAREN {printf("start new func scope %d\n", line_num); push_symbol_table(stack, create_symbol_table());} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
-              ;
 
-func_call_stmt : ID LPAREN param_call RPAREN
+
+
+function_stmt : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
+              | VOID ID {add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
+
+
+
+func_call_stmt : ID {
+        Symbol *s = get_symbol(stack, $1); 
+        if (s != NULL && s->is_func) {
+        last_declared_function = s->arguments;
+        }
+        else {
+            printf("Error: function '%s' not defined\n", $1);
+            exit(1);
+        }
+        } LPAREN param_call {
+                printf("func_param_count: %d\n", func_param_count);
+                if (func_param_count != last_declared_function->num_arguments) {
+                        printf("Error: number of arguments in function call does not match function definition at line %d: expected: %d but found: %d\n", line_num, last_declared_function->num_arguments, func_param_count);
+                        exit(1);
+                }
+                func_param_count = 0;
+        } RPAREN
                ;
 
 switch_stmt : SWITCH LPAREN expr RPAREN LBRACE case_stmt RBRACE
@@ -265,8 +352,8 @@ case_stmt :   CASE expr COLON body_stmt_list case_stmt
 block_stmt : LBRACE { push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
 // need to be changed    
-enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false);} enum_body 
-          | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false);}
+enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false, false, NULL);} enum_body 
+          | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false, false, NULL);}
           ;
 
 enum_stmt   : ENUM ID LBRACE enum_body RBRACE {enum_body_count = 0; }
@@ -279,6 +366,7 @@ return_stmt : RETURN expr
 %%
 
 void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
+        printf("start push_symbol_table\n");
     // check if stack is full
     if (stack->num_tables >= stack->max_tables) {
         printf("Error: symbol table stack is full\n");
@@ -288,9 +376,11 @@ void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
     // push new symbol table onto the stack
     table->idnex = stack->num_tables;
     stack->tables[stack->num_tables++] = table;
+        printf("start push_symbol_table\n");
 }
 
 void pop_symbol_table(SymbolTableStack *stack) {
+    check_unused_variables();
     // check if stack is empty
     if (stack->num_tables == 0) {
         printf("Error: symbol table stack is empty\n");
@@ -302,6 +392,13 @@ void pop_symbol_table(SymbolTableStack *stack) {
     printf("end scope %d at line %d\n", table->idnex, line_num);
     for (int j = 0; j < table->num_symbols; j++) {
         printf("symbol name: %s, symbol type: %d, symbol value: %s, symbol line: %d, symbol is_const: %d, symbol is_enum: %d, symbol is_func: %d\n", table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func);
+        if (table->symbols[j].is_func) {
+            printf("function arguments: \n");
+            for (int i = 0; i < table->symbols[j].arguments->num_arguments; i++) {
+                printf("%d ", table->symbols[j].arguments->arguments_types[i]);
+            }
+            printf("\n");
+        }
     }
     printf("************************************************************\n");
 
@@ -309,7 +406,7 @@ void pop_symbol_table(SymbolTableStack *stack) {
     stack->num_tables--;
 }
 
-void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int line, bool is_const, bool is_enum, bool is_func) {
+void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int line, bool is_const, bool is_enum, bool is_func, bool is_used, Arguments* arguments) {
     // check if stack is empty
     if (stack->num_tables == 0) {
         printf("Error: symbol table stack is empty\n");
@@ -335,10 +432,34 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
     // here make a new copy instance from the value to avoid sharing the same pointer
     char* val_copy = copy_value(value);
 
-    Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func};
+    Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func , is_used, arguments};
 
     table->symbols[table->num_symbols++] = symbol;
 }
+
+
+void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const)
+{
+    if(is_const)
+    {
+        printf("Error: cannot assign a value to const at line %d\n", line_num);
+        exit(1);
+    }
+    if (statement_type != s->type)
+    {
+        printf("Error: type mismatch in assignment at line %d\n", line_num);
+        exit(1);
+    } 
+    return ;
+}
+
+void check_always_false(int bool_val){
+    if (bool_val == 0){
+        printf("Warning: condition is always false at line %d\n", line_num);
+    }
+    return ;
+}
+
 
 char* copy_value(char* value) {
     char* val_copy = NULL;
@@ -383,7 +504,231 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     return NULL;
 }
 
+Symbol add_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                float float_val1 = 0;
+                float float_val2 = 0;
+                if (s1->type == INT_ENUM)
+                        int_val1 = atoi(s1->value);
+                else if (s1->type == FLOAT_ENUM)
+                        float_val1 = atof(s1->value);
 
+                if (s2->type == INT_ENUM)
+                        int_val2 = atoi(s2->value);
+                else if (s2->type == FLOAT_ENUM)
+                        float_val2 = atof(s2->value);
+                // perform operation
+                if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%d", int_val1 + int_val2);
+                        s.type = INT_ENUM;
+                } else if (s1->type == INT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", int_val1 + float_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 + int_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 + float_val2);
+                        s.type = FLOAT_ENUM;
+                } else {
+                        printf("Error: invalid types for addition\n");
+                        return s;
+                }
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
+
+Symbol sub_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                float float_val1 = 0;
+                float float_val2 = 0;
+                if (s1->type == INT_ENUM)
+                        int_val1 = atoi(s1->value);
+                else if (s1->type == FLOAT_ENUM)
+                        float_val1 = atof(s1->value);
+
+                if (s2->type == INT_ENUM)
+                        int_val2 = atoi(s2->value);
+                else if (s2->type == FLOAT_ENUM)
+                        float_val2 = atof(s2->value);
+
+                // perform operation
+                if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%d", int_val1 - int_val2);
+                        s.type = INT_ENUM;
+                } else if (s1->type == INT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", int_val1 - float_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 - int_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 - float_val2);
+                        s.type = FLOAT_ENUM;
+                } else {
+                        printf("Error: invalid types for subtraction\n");
+                        return s;
+                }
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
+
+void assign_value(char * id  ,void *v ) {
+    Symbol* s = void_to_symbol(v);
+    Symbol* lhs_symbol = get_symbol(stack, id);
+    if (lhs_symbol == NULL) {
+        printf("Error: variable %s not declared in line %d\n", id, line_num);
+        exit(1);
+    }
+    check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
+    lhs_symbol->value = copy_value(s->value);
+}
+
+Symbol mul_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                float float_val1 = 0;
+                float float_val2 = 0;
+                if (s1->type == INT_ENUM)
+                        int_val1 = atoi(s1->value);
+                else if (s1->type == FLOAT_ENUM)
+                        float_val1 = atof(s1->value);
+
+                if (s2->type == INT_ENUM)
+                        int_val2 = atoi(s2->value);
+                else if (s2->type == FLOAT_ENUM)
+                        float_val2 = atof(s2->value);
+
+                // perform operation
+                if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%d", int_val1 * int_val2);
+                        s.type = INT_ENUM;
+                } else if (s1->type == INT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", int_val1 * float_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 * int_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 * float_val2);
+                        s.type = FLOAT_ENUM;
+                } else {
+                        printf("Error: invalid types for multiplication\n");
+                        return s;
+                }
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
+
+Symbol div_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                float float_val1 = 0;
+                float float_val2 = 0;
+                if (s1->type == INT_ENUM)
+                        int_val1 = atoi(s1->value);
+                else if (s1->type == FLOAT_ENUM)
+                        float_val1 = atof(s1->value);
+
+                if (s2->type == INT_ENUM)
+                        int_val2 = atoi(s2->value);
+                else if (s2->type == FLOAT_ENUM)
+                        float_val2 = atof(s2->value);
+
+                // perform operation
+                if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%d", int_val1 / int_val2);
+                        s.type = INT_ENUM;
+                } else if (s1->type == INT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", int_val1 / float_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == INT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 / int_val2);
+                        s.type = FLOAT_ENUM;
+                } else if (s1->type == FLOAT_ENUM && s2->type == FLOAT_ENUM) {
+                        sprintf(str_val, "%.2f", float_val1 / float_val2);
+                        s.type = FLOAT_ENUM;
+                } else {
+                        printf("Error: invalid types for division\n");
+                        return s;
+                }
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
+
+Symbol mod_op(void *a, void *b) {
+                Symbol s;
+                Symbol *s1 = void_to_symbol(a);
+                Symbol *s2 = void_to_symbol(b);
+                char str_val[20] = "";
+
+                // check if one of the operands are float type and return error
+                if (s1->type == FLOAT_ENUM || s2->type == FLOAT_ENUM) {
+                        printf("Error: invalid types for modulo\n");
+                        return s;
+                }
+
+                // convert from string according to symbol type
+                int int_val1 = 0;
+                int int_val2 = 0;
+                int_val1 = atoi(s1->value);
+                int_val2 = atoi(s2->value);
+
+                sprintf(str_val, "%d", int_val1 % int_val2);
+                s.type = INT_ENUM;
+
+                char* val_copy = copy_value(str_val);
+                s.value = val_copy;
+                return s;
+}
+
+void add_arguments(Arguments* arguments, int type) {
+    arguments->arguments_types[arguments->num_arguments] = type;
+    arguments->num_arguments++;
+}
+
+// Loop over symbol table and raise warning if any variable is not used
+void check_unused_variables() {
+        SymbolTable *table = stack->tables[stack->num_tables - 1];
+        for (int j = 0; j < table->num_symbols; j++) {
+            if (table->symbols[j].is_used == 0 && table->symbols[j].is_func == 0) {
+                printf("Warning: variable %s declared but not used\n", table->symbols[j].name);
+            }
+        }
+}
 
 
 int main (void) {
