@@ -6,12 +6,12 @@ while (x < y) {
     print("x is less than y");
 }
 
-void func(int z) {
+int func(int z, float y, bool x, string s) {
     print(z);
     print("inside func");
 }
 
-// func();
+x("44", 8.3, 3.6, "hello");
 
 
 // print(x);

@@ -161,11 +161,11 @@
 
 - Variable usage before declaration => ihab (Done)
 
-- Function call with wrong number of arguments 
+- Function call with wrong number of arguments => weaam (Done) 
 
-- Function call with wrong type of arguments 
+- Function call with wrong type of arguments => weaam (Done) 
 
-- Function call to function that is not declared
+- Function call to function that is not declared => weaam (Done)
 
 - Unused variables => ihab
 

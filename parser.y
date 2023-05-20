@@ -13,8 +13,8 @@
 
         typedef struct {
         int *arguments_types;    // array of symbols
-        int num_symbols;    // number of symbols in the array
-        int max_symbols;    // maximum number of symbols that can be stored
+        int num_arguments;    // number of symbols in the array
+        int max_arguments;    // maximum number of symbols that can be stored
         } Arguments;
 
         // Datastructures for symbol table
@@ -77,8 +77,8 @@
                 printf("start create_function_argumetns\n");
                 Arguments *arguments = malloc(sizeof(Arguments));
                 arguments->arguments_types = malloc(25 * sizeof(int));
-                arguments->num_symbols = 0;
-                arguments->max_symbols = SYMBOL_MAX;
+                arguments->num_arguments = 0;
+                arguments->max_arguments = 25;
                 printf("end create_function_argumetns\n");
                 return arguments;
         }
@@ -111,6 +111,7 @@
         extern int line_num ;
         int enum_body_count = 0 ;
         Arguments *last_declared_function = NULL;
+        int func_param_count = 0;
 %}
 
 %union{
@@ -267,29 +268,37 @@ type : INTTYPE {$$ = INT_ENUM;}
      | ENUM {$$ = ENUM_ENUM;}
      ;
 
-param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type);}
-      | type ID COMMA param {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type);}
+param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); printf("%s\n", s.name); add_arguments(last_declared_function, s.type);}
+      | type ID COMMA {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type);} param
       |  {printf("%d %s" , line_num , "empty param list\n");}
       ;
 
-param_call : | ID COMMA param_call 
-             | ID
+param_call : | expr COMMA {Symbol *s = void_to_symbol($1); if (s->type != last_declared_function->arguments_types[func_param_count]) {printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);} func_param_count++;} param_call 
+             | expr {Symbol *s = void_to_symbol($1); if (s->type != last_declared_function->arguments_types[func_param_count]) {printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);} func_param_count++;}
              | {printf("empty param call list\n");}
              ;
 
-function_stmt : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, true, false, NULL);} LPAREN {
-        printf("start new func scope %d\n", line_num);
-        push_symbol_table(stack, create_symbol_table());
-        last_declared_function = get_symbol(stack, $2)->arguments;
-        } param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
-              | VOID ID {add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true, false, NULL);} LPAREN {
-                printf("start new func scope %d\n", line_num);
-                push_symbol_table(stack, create_symbol_table());
-                last_declared_function = get_symbol(stack, $2)->arguments;
-                } param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
+function_stmt : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
+              | VOID ID {add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
               ;
 
-func_call_stmt : ID LPAREN param_call RPAREN
+func_call_stmt : ID {
+        Symbol *s = get_symbol(stack, $1); 
+        if (s != NULL && s->is_func) {
+        last_declared_function = s->arguments;
+        }
+        else {
+            printf("Error: function '%s' not defined\n", $1);
+            exit(1);
+        }
+        } LPAREN param_call {
+                printf("func_param_count: %d\n", func_param_count);
+                if (func_param_count != last_declared_function->num_arguments) {
+                        printf("Error: number of arguments in function call does not match function definition at line %d: expected: %d but found: %d\n", line_num, last_declared_function->num_arguments, func_param_count);
+                        exit(1);
+                }
+                func_param_count = 0;
+        } RPAREN
                ;
 
 switch_stmt : SWITCH LPAREN expr RPAREN LBRACE case_stmt RBRACE
@@ -322,6 +331,7 @@ return_stmt : RETURN expr
 %%
 
 void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
+        printf("start push_symbol_table\n");
     // check if stack is full
     if (stack->num_tables >= stack->max_tables) {
         printf("Error: symbol table stack is full\n");
@@ -331,6 +341,7 @@ void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
     // push new symbol table onto the stack
     table->idnex = stack->num_tables;
     stack->tables[stack->num_tables++] = table;
+        printf("start push_symbol_table\n");
 }
 
 void pop_symbol_table(SymbolTableStack *stack) {
@@ -346,8 +357,8 @@ void pop_symbol_table(SymbolTableStack *stack) {
     for (int j = 0; j < table->num_symbols; j++) {
         printf("symbol name: %s, symbol type: %d, symbol value: %s, symbol line: %d, symbol is_const: %d, symbol is_enum: %d, symbol is_func: %d\n", table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func);
         if (table->symbols[j].is_func) {
-            printf("function arguments: ");
-            for (int i = 0; i < table->symbols[j].arguments->num_symbols; i++) {
+            printf("function arguments: \n");
+            for (int i = 0; i < table->symbols[j].arguments->num_arguments; i++) {
                 printf("%d ", table->symbols[j].arguments->arguments_types[i]);
             }
             printf("\n");
@@ -385,7 +396,7 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
     // here make a new copy instance from the value to avoid sharing the same pointer
     char* val_copy = copy_value(value);
 
-    Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func};
+    Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func , is_used, arguments};
 
     table->symbols[table->num_symbols++] = symbol;
 }
@@ -664,8 +675,8 @@ Symbol mod_op(void *a, void *b) {
 }
 
 void add_arguments(Arguments* arguments, int type) {
-    arguments->arguments_types[arguments->num_symbols] = type;
-    arguments->num_symbols++;
+    arguments->arguments_types[arguments->num_arguments] = type;
+    arguments->num_arguments++;
 }
 
 
