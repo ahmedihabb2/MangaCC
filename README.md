@@ -177,6 +177,6 @@
 
 - const & enum handling (Anwar)
 
-- iterations & functions handling => weaam
+- iterations & functions handling => weaam (Done)
 
 - switch and if statements handling (Anwar)
