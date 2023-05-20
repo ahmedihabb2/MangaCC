@@ -185,13 +185,17 @@ enum_val : ID
 
 assignment : type ID ASSIGN expr {
                 Symbol* s = void_to_symbol($4);
-                //check_assignment_types($1, s, line_num,0);
+                check_assignment_types($1, s, line_num,0);
                 add_symbol(stack, $2, $1, s->value, line_num, false, false, false);
                 }
               | ID ASSIGN expr {
                 Symbol* s = void_to_symbol($3);
                 Symbol* lhs_symbol = get_symbol(stack, $1);
-                //check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
+                if (lhs_symbol == NULL) {
+                    printf("Error: variable %s not declared in line %d\n", $1, line_num);
+                    exit(1);
+                }
+                check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
                 lhs_symbol->value = copy_value(s->value);
                 }
               | CONST type ID ASSIGN expr
