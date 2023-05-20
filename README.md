@@ -169,11 +169,11 @@
 
 - Unused variables => ihab (Done)
 
-- Warning if the if statement condition is always false (Anwar)
+- Warning if the if statement condition is always false (Anwar) (Done)
 
 - expression actions => weaam (Done)
 
-- const & enum handling (Anwar)
+- const & enum handling (Anwar) (Done)
 
 - iterations & functions handling => weaam (Done)
 
