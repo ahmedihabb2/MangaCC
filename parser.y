@@ -195,6 +195,10 @@ assignment : type ID ASSIGN expr {
               | ID ASSIGN expr {
                 Symbol* s = void_to_symbol($3);
                 Symbol* lhs_symbol = get_symbol(stack, $1);
+                if (lhs_symbol == NULL) {
+                    printf("Error: variable %s not declared in line %d\n", $1, line_num);
+                    exit(1);
+                }
                 check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
                 lhs_symbol->value = copy_value(s->value);
                 }
