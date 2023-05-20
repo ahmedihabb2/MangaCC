@@ -53,7 +53,7 @@
 "or"         {return OR;}
 "not"        {return NOT;}
 "xor"        {return XOR;}
-"true"|"false" {yylval.boolean = yytext[0]=="t"; return BOOL;}
+"true"|"false" {yylval.boolean = yytext[0]=='t'; return BOOL;}
 
 [ \t]+        {;}
 \/\/.*        {;}

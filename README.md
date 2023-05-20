@@ -153,3 +153,22 @@
 - Note: the test file should be in the test_cases folder.
 
 - It will print the tokens with its line number.
+
+
+## To-Do
+
+- Type checking => ihab
+
+- Variable usage before declaration => ihab
+
+- Unused variables => ihab
+
+- Warning if the if statement condition is always false (Anwar)
+
+- expression actions => weaam (Done)
+
+- const & enum handling (Anwar)
+
+- iterations & functions handling => weaam
+
+- switch and if statements handling (Anwar)
