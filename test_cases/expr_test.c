@@ -2,6 +2,10 @@ int x = 5;
 int y = 3;
 // float y = 13.0;
 
+while (x < y) {
+    print("x is less than y");
+}
+
 // print(x);
 // print(y);
 
