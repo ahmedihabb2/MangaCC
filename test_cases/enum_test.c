@@ -4,3 +4,7 @@ enum color c;
 c = GREEN ;
 
 print(c);
+
+if (false){
+  int x = 0;
+}endif

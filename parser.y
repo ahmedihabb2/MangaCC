@@ -94,6 +94,8 @@
         void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const);
         void add_arguments(Arguments *arguments, int type);
         void assign_value(char * id  ,void *v);
+        void assign_value(char * id  ,void *v );
+        void check_unused_variables() ;
 
 
         // operrator functions
@@ -201,9 +203,9 @@ expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((voi
         | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}  // TODO
         | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
         | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);check_always_false($1);}
         | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v;}
-        | ID                    {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
+        | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;printf("ID: %s Marked as Used \n", s->name); void *v= (void*)s; $$ = copy_void(v);}
         ;
 
 enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
@@ -271,16 +273,49 @@ type : INTTYPE {$$ = INT_ENUM;}
 param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); printf("%s\n", s.name); add_arguments(last_declared_function, s.type);}
       | type ID COMMA {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type);} param
       |  {printf("%d %s" , line_num , "empty param list\n");}
-      ;
+      ;     
 
-param_call : | expr COMMA {Symbol *s = void_to_symbol($1); if (s->type != last_declared_function->arguments_types[func_param_count]) {printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);} func_param_count++;} param_call 
-             | expr {Symbol *s = void_to_symbol($1); if (s->type != last_declared_function->arguments_types[func_param_count]) {printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);} func_param_count++;}
+param_call : | expr COMMA {
+                // Check if the ID exists in the symbol table
+                Symbol *s = void_to_symbol($1); 
+                if (s->type != last_declared_function->arguments_types[func_param_count]) {
+                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);
+                }
+                func_param_count++;
+                if (s == NULL) {
+                    printf("Error: %s is not defined in line %d\n", $1, line_num);
+                    exit(1);
+                } else {
+                        // Mark the symbol as used
+                        s->is_used = true;
+                        printf("ID: %s Marked as Used \n", s->name);
+                }} param_call 
+             | expr {
+                // Check if the ID exists in the symbol table
+                Symbol *s = void_to_symbol($1); 
+                if (s->type != last_declared_function->arguments_types[func_param_count]) {
+                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);
+                }
+                func_param_count++;
+                if (s == NULL) {
+                    printf("Error: %s is not defined in line %d\n", $1, line_num);
+                    exit(1);
+                } else {
+                        // Mark the symbol as used
+                        s->is_used = true;
+                        printf("ID: %s Marked as Used \n", s->name);
+                }
+             }
              | {printf("empty param call list\n");}
              ;
 
+
+
+
 function_stmt : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
               | VOID ID {add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
-              ;
+
+
 
 func_call_stmt : ID {
         Symbol *s = get_symbol(stack, $1); 
@@ -345,6 +380,7 @@ void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
 }
 
 void pop_symbol_table(SymbolTableStack *stack) {
+    check_unused_variables();
     // check if stack is empty
     if (stack->num_tables == 0) {
         printf("Error: symbol table stack is empty\n");
@@ -417,6 +453,13 @@ void check_assignment_types(int statement_type , Symbol * s , int line_num, bool
     return ;
 }
 
+void check_always_false(int bool_val){
+    if (bool_val == 0){
+        printf("Warning: condition is always false at line %d\n", line_num);
+    }
+    return ;
+}
+
 
 char* copy_value(char* value) {
     char* val_copy = NULL;
@@ -466,7 +509,6 @@ Symbol add_op(void *a, void *b) {
                 Symbol *s1 = void_to_symbol(a);
                 Symbol *s2 = void_to_symbol(b);
                 char str_val[20] = "";
-
                 // convert from string according to symbol type
                 int int_val1 = 0;
                 int int_val2 = 0;
@@ -481,7 +523,6 @@ Symbol add_op(void *a, void *b) {
                         int_val2 = atoi(s2->value);
                 else if (s2->type == FLOAT_ENUM)
                         float_val2 = atof(s2->value);
-
                 // perform operation
                 if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
                         sprintf(str_val, "%d", int_val1 + int_val2);
@@ -677,6 +718,16 @@ Symbol mod_op(void *a, void *b) {
 void add_arguments(Arguments* arguments, int type) {
     arguments->arguments_types[arguments->num_arguments] = type;
     arguments->num_arguments++;
+}
+
+// Loop over symbol table and raise warning if any variable is not used
+void check_unused_variables() {
+        SymbolTable *table = stack->tables[stack->num_tables - 1];
+        for (int j = 0; j < table->num_symbols; j++) {
+            if (table->symbols[j].is_used == 0 && table->symbols[j].is_func == 0) {
+                printf("Warning: variable %s declared but not used\n", table->symbols[j].name);
+            }
+        }
 }
 
 
