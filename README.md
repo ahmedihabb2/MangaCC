@@ -169,7 +169,7 @@
 
 - Function call to function that is not declared
 
-- Unused variables => ihab
+- Unused variables => ihab (Done)
 
 - Warning if the if statement condition is always false (Anwar)
 
@@ -180,3 +180,5 @@
 - iterations & functions handling => weaam (Done)
 
 - switch and if statements handling (Anwar)
+
+- Handle arguments with null values

@@ -20,6 +20,7 @@
         bool is_const;      // is the symbol a constant?
         bool is_enum;       // is the symbol an enum?
         bool is_func;       // is the symbol a function?
+        bool is_used;       // is the symbol used?
         } Symbol;
 
         typedef struct {
@@ -64,7 +65,7 @@
         }
 
 
-        void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int line, bool is_const, bool is_enum, bool is_func);
+        void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int line, bool is_const, bool is_enum, bool is_func,bool is_used);
         Symbol *get_symbol(SymbolTableStack *stack, char *name);
         void push_symbol_table(SymbolTableStack *stack, SymbolTable *table);
         void pop_symbol_table(SymbolTableStack *stack);
@@ -72,6 +73,8 @@
         void* copy_void(void* value); // copy the value to a new memory address
         Symbol *void_to_symbol(void *v) {return (Symbol*)v;} 
         void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const);
+        void assign_value(char * id  ,void *v );
+        void check_unused_variables() ;
 
 
         // operrator functions
@@ -179,7 +182,7 @@ expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((voi
         | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
         | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
         | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v;}
-        | ID                    {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
+        | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;printf("ID: %s Marked as Used \n", s->name); void *v= (void*)s; $$ = copy_void(v);}
         ;
 
 enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
@@ -189,26 +192,26 @@ enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_
 assignment : type ID ASSIGN expr {
                 Symbol* s = void_to_symbol($4);
                 check_assignment_types($1, s, line_num,0);
-                add_symbol(stack, $2, $1, s->value, line_num, false, false, false);
+                add_symbol(stack, $2, $1, s->value, line_num, false, false, false,false);
                 }
               | ID ASSIGN expr {
                 assign_value($1,$3);
                 }
               | CONST type ID ASSIGN expr {
                 Symbol* s = void_to_symbol($5);
-                add_symbol(stack, $3, $2, s->value, line_num, true, false, false);
+                add_symbol(stack, $3, $2, s->value, line_num, true, false, false,false);
               }
               | ENUM ID ID ASSIGN enum_val {
                 Symbol* s = void_to_symbol($5);
-                add_symbol(stack, $3, INT_ENUM , s->value, line_num, false, true, false);
+                add_symbol(stack, $3, INT_ENUM , s->value, line_num, false, true, false,false);
               }
            ;
 
 declare : type ID {
-                add_symbol(stack, $2, $1, 0, line_num, false, false, false);
+                add_symbol(stack, $2, $1, 0, line_num, false, false, false,false);
                 }
         | ENUM ID ID {
-                add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false);
+                add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false,false);
                 }
         ;
 
@@ -244,18 +247,39 @@ type : INTTYPE {$$ = INT_ENUM;}
      | ENUM {$$ = ENUM_ENUM;}
      ;
 
-param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false);}
-      | type ID COMMA param {add_symbol(stack, $2, $1, 0, line_num, false, false, false);}
+param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false,false);}
+      | type ID COMMA param {add_symbol(stack, $2, $1, 0, line_num, false, false, false,false);}
       |  {printf("%d %s" , line_num , "empty param list\n");}
       ;
 
-param_call : | ID COMMA param_call 
-             | ID
+param_call : | ID COMMA {
+                // Check if the ID exists in the symbol table
+                Symbol* s = get_symbol(stack, $1);
+                if (s == NULL) {
+                    printf("Error: %s is not defined in line %d\n", $1, line_num);
+                    exit(1);
+                } else {
+                        // Mark the symbol as used
+                        s->is_used = true;
+                        printf("ID: %s Marked as Used \n", s->name);
+                }} param_call 
+             | ID {
+                // Check if the ID exists in the symbol table
+                Symbol* s = get_symbol(stack, $1);
+                if (s == NULL) {
+                    printf("Error: %s is not defined in line %d\n", $1, line_num);
+                    exit(1);
+                } else {
+                        // Mark the symbol as used
+                        s->is_used = true;
+                        printf("ID: %s Marked as Used \n", s->name);
+                }
+             }
              | {printf("empty param call list\n");}
              ;
 
-function_stmt : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, true);} LPAREN {printf("start new func scope %d\n", line_num); push_symbol_table(stack, create_symbol_table());} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
-              | VOID ID {add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true);} LPAREN {printf("start new func scope %d\n", line_num); push_symbol_table(stack, create_symbol_table());} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
+function_stmt : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, true,false);} LPAREN {printf("start new func scope %d\n", line_num); push_symbol_table(stack, create_symbol_table());} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
+              | VOID ID {add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true,false);} LPAREN {printf("start new func scope %d\n", line_num); push_symbol_table(stack, create_symbol_table());} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
               ;
 
 func_call_stmt : ID LPAREN param_call RPAREN
@@ -277,8 +301,8 @@ case_stmt :   CASE expr COLON body_stmt_list case_stmt
 block_stmt : LBRACE { push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
 // need to be changed    
-enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false);} enum_body 
-          | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false);}
+enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false,false);} enum_body 
+          | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false,false);}
           ;
 
 enum_stmt   : ENUM ID LBRACE enum_body RBRACE {enum_body_count = 0; }
@@ -303,6 +327,7 @@ void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
 }
 
 void pop_symbol_table(SymbolTableStack *stack) {
+    check_unused_variables();
     // check if stack is empty
     if (stack->num_tables == 0) {
         printf("Error: symbol table stack is empty\n");
@@ -321,7 +346,7 @@ void pop_symbol_table(SymbolTableStack *stack) {
     stack->num_tables--;
 }
 
-void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int line, bool is_const, bool is_enum, bool is_func) {
+void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int line, bool is_const, bool is_enum, bool is_func, bool is_used) {
     // check if stack is empty
     if (stack->num_tables == 0) {
         printf("Error: symbol table stack is empty\n");
@@ -347,7 +372,7 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
     // here make a new copy instance from the value to avoid sharing the same pointer
     char* val_copy = copy_value(value);
 
-    Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func};
+    Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func, is_used};
 
     table->symbols[table->num_symbols++] = symbol;
 }
@@ -417,7 +442,6 @@ Symbol add_op(void *a, void *b) {
                 Symbol *s1 = void_to_symbol(a);
                 Symbol *s2 = void_to_symbol(b);
                 char str_val[20] = "";
-
                 // convert from string according to symbol type
                 int int_val1 = 0;
                 int int_val2 = 0;
@@ -432,7 +456,6 @@ Symbol add_op(void *a, void *b) {
                         int_val2 = atoi(s2->value);
                 else if (s2->type == FLOAT_ENUM)
                         float_val2 = atof(s2->value);
-
                 // perform operation
                 if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
                         sprintf(str_val, "%d", int_val1 + int_val2);
@@ -623,6 +646,16 @@ Symbol mod_op(void *a, void *b) {
                 char* val_copy = copy_value(str_val);
                 s.value = val_copy;
                 return s;
+}
+
+// Loop over symbol table and raise warning if any variable is not used
+void check_unused_variables() {
+        SymbolTable *table = stack->tables[stack->num_tables - 1];
+        for (int j = 0; j < table->num_symbols; j++) {
+            if (table->symbols[j].is_used == 0 && table->symbols[j].is_func == 0) {
+                printf("Warning: variable %s declared but not used\n", table->symbols[j].name);
+            }
+        }
 }
 
 
