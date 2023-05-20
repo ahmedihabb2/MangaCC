@@ -187,13 +187,19 @@ assignment : type ID ASSIGN expr {
                 Symbol* s = void_to_symbol($5);
                 add_symbol(stack, $3, $2, s->value, line_num, true, false, false);
               }
-              | ENUM ID ID ASSIGN enum_val
+              | ENUM ID ID ASSIGN enum_val {
+                Symbol* s = void_to_symbol($5);
+                add_symbol(stack, $3, INT_ENUM , s->value, line_num, false, true, false);
+              }
            ;
 
 declare : type ID {
                 add_symbol(stack, $2, $1, 0, line_num, false, false, false);
                 }
-        | ENUM ID ID 
+        | ENUM ID ID {
+                add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false);
+                }
+        }
         ;
 
 else_if_stmt : ELSEIF LPAREN expr RPAREN LBRACE body_stmt_list RBRACE else_if_stmt
@@ -260,9 +266,9 @@ case_stmt :   CASE expr COLON body_stmt_list case_stmt
 
 block_stmt : LBRACE { push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
-
-enum_body : ID COMMA enum_body
-          | ID
+// need to be changed
+enum_body : ID COMMA enum_body {add_symbol(stack, $1, INT_ENUM, enum_body_count++, line_num, false, true, false);}
+          | ID {add_symbol(stack, $1, INT_ENUM, enum_body_count++, line_num, false, true, false);}
           ;
 
 enum_stmt   : ENUM ID LBRACE enum_body RBRACE 
@@ -311,9 +317,14 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
         printf("Error: symbol table stack is empty\n");
         return;
     }
-
-    // get the top symbol table on the stack
-    SymbolTable *table = stack->tables[stack->num_tables - 1];
+    SymbolTable *table  = NULL;
+    if (is_enum){
+        // get the global symbol table
+       table = stack->tables[0];
+    }else {
+        // get the top symbol table on the stack
+       table = stack->tables[stack->num_tables - 1];
+    }
 
     // check if symbol already exists in the table
     for (int i = 0; i < table->num_symbols; i++) {
