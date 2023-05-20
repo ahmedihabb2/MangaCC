@@ -189,14 +189,7 @@ assignment : type ID ASSIGN expr {
                 add_symbol(stack, $2, $1, s->value, line_num, false, false, false);
                 }
               | ID ASSIGN expr {
-                Symbol* s = void_to_symbol($3);
-                Symbol* lhs_symbol = get_symbol(stack, $1);
-                if (lhs_symbol == NULL) {
-                    printf("Error: variable %s not declared in line %d\n", $1, line_num);
-                    exit(1);
-                }
-                check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
-                lhs_symbol->value = copy_value(s->value);
+                assign_value($1,$3);
                 }
               | CONST type ID ASSIGN expr
               | ENUM ID ID ASSIGN enum_val
@@ -491,6 +484,16 @@ Symbol sub_op(void *a, void *b) {
                 return s;
 }
 
+void assign_value(char * id  ,void *v ) {
+    Symbol* s = void_to_symbol(v);
+    Symbol* lhs_symbol = get_symbol(stack, id);
+    if (lhs_symbol == NULL) {
+        printf("Error: variable %s not declared in line %d\n", id, line_num);
+        exit(1);
+    }
+    check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
+    lhs_symbol->value = copy_value(s->value);
+}
 
 
 int main (void) {
