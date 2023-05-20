@@ -202,7 +202,10 @@ assignment : type ID ASSIGN expr {
                 check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
                 lhs_symbol->value = copy_value(s->value);
                 }
-              | CONST type ID ASSIGN expr
+              | CONST type ID ASSIGN expr {
+                Symbol* s = void_to_symbol($5);
+                add_symbol(stack, $3, $2, s->value, line_num, true, false, false);
+              }
               | ENUM ID ID ASSIGN enum_val
            ;
 
