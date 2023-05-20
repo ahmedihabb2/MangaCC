@@ -87,7 +87,7 @@
         SymbolTableStack *stack;
 
         extern int line_num ;
-
+        int enum_body_count = 0 ;
 %}
 
 %union{
@@ -111,10 +111,9 @@
 %token PLUS MINUS TIMES DIV MOD ASSIGN COMMA COLON
 %token LT GT EQ NE LE GE AND OR NOT XOR
 %token LPAREN RPAREN LBRACE RBRACE SEMI 
-%type <symbolval> expr
+%type <symbolval> expr enum_val
 %type <integer> type
 %type <voidval> VOID
-
 %right ASSIGN
 %left OR 
 %left AND
@@ -183,8 +182,8 @@ expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((voi
         | ID                    {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
         ;
 
-enum_val : ID
-         | INT
+enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
+         | INT  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
          ;
 
 assignment : type ID ASSIGN expr {
@@ -211,7 +210,6 @@ declare : type ID {
         | ENUM ID ID {
                 add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false);
                 }
-        }
         ;
 
 else_if_stmt : ELSEIF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE  {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} else_if_stmt
@@ -278,12 +276,12 @@ case_stmt :   CASE expr COLON body_stmt_list case_stmt
 
 block_stmt : LBRACE { push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
-// need to be changed
-enum_body : ID COMMA enum_body {add_symbol(stack, $1, INT_ENUM, enum_body_count++, line_num, false, true, false);}
-          | ID {add_symbol(stack, $1, INT_ENUM, enum_body_count++, line_num, false, true, false);}
+// need to be changed    
+enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false);} enum_body 
+          | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false);}
           ;
 
-enum_stmt   : ENUM ID LBRACE enum_body RBRACE 
+enum_stmt   : ENUM ID LBRACE enum_body RBRACE {enum_body_count = 0; }
             ;
 
 return_stmt : RETURN expr
