@@ -64,12 +64,10 @@
         }
 
         SymbolTableStack *create_symbol_table_stack() {
-                printf("start create_symbol_table_stack\n");
                 SymbolTableStack *stack = malloc(sizeof(SymbolTableStack));
                 stack->tables = malloc(SYMBOL_TABLE_MAX * sizeof(SymbolTable *));
                 stack->num_tables = 0;
                 stack->max_tables = SYMBOL_TABLE_MAX;
-                printf("end create_symbol_table_stack\n");
                 return stack;
         }
 
@@ -408,7 +406,6 @@ return_stmt : RETURN expr
 %%
 
 void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
-        printf("start push_symbol_table\n");
     // check if stack is full
     if (stack->num_tables >= stack->max_tables) {
         printf("Error: symbol table stack is full\n");
@@ -418,7 +415,6 @@ void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
     // push new symbol table onto the stack
     table->idnex = stack->num_tables;
     stack->tables[stack->num_tables++] = table;
-        printf("start push_symbol_table\n");
 }
 
 void pop_symbol_table(SymbolTableStack *stack) {
@@ -774,26 +770,20 @@ void check_unused_variables() {
 
 /// Quads functions
 void push(char *s) {
-        printf("push \n");
-        printf("push %s\n", s);
         strcpy(QuadStack[QuadStackIndex++] , s); 
         sprintf(Quads[QuadsIndex++], "PUSH %s "  , s); 
 }
 
 void push_id(char *s) {
-        printf("push \n");
-        printf("push %s\n", s);
         strcpy(QuadStack[QuadStackIndex++] , s); 
 }
 
 void pop(char *s) {
-       printf("pop %s\n", s);
        --QuadStackIndex;
        sprintf(Quads[QuadsIndex++], "POP %s "  , s);
 }
 
 void one_op(char * op) {
-        printf("%s one\n", op);
         char * arg = strdup(QuadStack[--QuadStackIndex]);
         char tempReg[10];       
         sprintf(tempReg, "t%d", tempRegIndex++);
@@ -802,7 +792,6 @@ void one_op(char * op) {
 }
 
 void two_op(char* op) {
-        printf("%s two\n", op);
         char * arg1 = strdup(QuadStack[QuadStackIndex-2]);
         char * arg2 = strdup(QuadStack[QuadStackIndex-1]);
         QuadStackIndex-= 2;
