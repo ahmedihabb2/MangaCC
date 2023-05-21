@@ -8,3 +8,7 @@ float d = 4.5 * 6.5;
 bool bo     = true;
 
 string s =  "MangaCC";
+
+if (a > b) {
+    c = c % 2; 
+} endif

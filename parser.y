@@ -95,7 +95,8 @@
         void add_arguments(Arguments *arguments, int type);
         void assign_value(char * id  ,void *v);
         void assign_value(char * id  ,void *v );
-        void check_unused_variables() ;
+        void check_unused_variables();
+        void check_always_false(int bool_val);
 
 
         // operrator functions
@@ -125,13 +126,26 @@
 
         int tempRegIndex = 0 ;
 
+        int label_count = 0;
+        int labelStackIndex = 0;
+        char labelStack[1000][100];
+
         // quads functions 
         void push(char *s);
         void push_id(char *s);
-        void push_value(char * value) ;
+        void push_value(char * value);
         void pop(char *s);
-        void one_op(char * op) ;
-        void two_op(char * op) ;   
+        void one_op(char * op);
+        void two_op(char * op);
+
+        // control flow functions
+        void add_label();
+        void pop_labels(int num);
+        void jump(bool add_label_flag, int label_offset);
+        void jump_zero(bool add_label_flag);
+        void print_label(bool add_label_flag, int label_offset);
+        void jump_break();
+
 
         // quads helper
         void QuadsToFile(char * filename) ;
@@ -311,7 +325,7 @@ param_call : | expr COMMA {
                 }
                 func_param_count++;
                 if (s == NULL) {
-                    printf("Error: %s is not defined in line %d\n", $1, line_num);
+                    printf("Error: %s is not defined in line %d\n", s->name, line_num);
                     exit(1);
                 } else {
                         // Mark the symbol as used
@@ -326,7 +340,7 @@ param_call : | expr COMMA {
                 }
                 func_param_count++;
                 if (s == NULL) {
-                    printf("Error: %s is not defined in line %d\n", $1, line_num);
+                    printf("Error: %s is not defined in line %d\n", s->name, line_num);
                     exit(1);
                 } else {
                         // Mark the symbol as used
@@ -481,7 +495,7 @@ void check_assignment_types(int statement_type , Symbol * s , int line_num, bool
     return ;
 }
 
-void check_always_false(int bool_val){
+void check_always_false(int bool_val) {
     if (bool_val == 0){
         printf("Warning: condition is always false at line %d\n", line_num);
     }
@@ -796,6 +810,41 @@ void two_op(char* op) {
         sprintf(tempReg, "t%d", tempRegIndex++);
         strcpy(QuadStack[QuadStackIndex++], tempReg);
         sprintf(Quads[QuadsIndex++], "%s %s %s %s ", op, arg1, arg2, QuadStack[QuadStackIndex-1]);
+}
+
+void add_label() {
+        char temp_label[10];
+        sprintf(temp_label, "L%d", label_count++);
+        strcpy(labelStack[labelStackIndex++], temp_label);
+}
+
+void pop_labels(int num) {
+        labelStackIndex -= num;
+}
+
+void jump(bool add_label_flag, int label_offset) {
+        if (add_label_flag) {
+                add_label();
+        }
+        sprintf(Quads[QuadsIndex++], "JUMP %s ", labelStack[labelStackIndex-1-label_offset]);
+}
+
+void jump_zero(bool add_label_flag) {
+        if (add_label_flag) {
+                add_label();
+        }
+        sprintf(Quads[QuadsIndex++], "JUMPZERO %s ", labelStack[labelStackIndex-1]);
+}
+
+void print_label(bool add_label_flag, int label_offset) {
+        if (add_label_flag) {
+                add_label();
+        }
+        sprintf(Quads[QuadsIndex++], "%s: ", labelStack[labelStackIndex-1-label_offset]);
+}
+
+void jump_break() {
+        sprintf(Quads[QuadsIndex++], "JUMP %s ", labelStack[labelStackIndex-1]);
 }
 
 void QuadsToFile(char * filename) {
