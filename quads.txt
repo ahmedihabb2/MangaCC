@@ -50,9 +50,27 @@ L4:
 L5: 
 PUSH c 
 PUSH 1 
-ADD c 1 t8 
+ADD c 1 t9 
 POP c 
 PUSH c 
 PUSH 10 
-GT c 10 t9 
+GT c 10 t10 
 JUMPNONZERO L5 
+PUSH 2 
+POP a 
+PUSH 3 
+POP b 
+JUMP func 
+POP t10 
+
+
+
+ hlt 
+
+
+
+func: 
+PUSH a 
+PUSH b 
+ADD a b t8 
+return

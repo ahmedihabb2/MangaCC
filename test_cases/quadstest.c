@@ -23,6 +23,15 @@ while (a > 0) {
     a = a - 1;
 }
 
+
+int func(int a, int b) {
+    return a + b;
+}
+
+
+
 repeat {
     c = c + 1;
 } until (c > 10);
+
+int e = func(2, 3);
