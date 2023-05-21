@@ -25,3 +25,12 @@ MOD c 2 t3
 POP c 
 JUMP L0 
 L1: 
+L2: 
+PUSH c 
+PUSH 1 
+ADD c 1 t4 
+POP c 
+PUSH c 
+PUSH 10 
+GT c 10 t5 
+JUMPZERO L2 

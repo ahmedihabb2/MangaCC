@@ -12,3 +12,7 @@ string s =  "MangaCC";
 while (a > b) {
     c = c % 2; 
 }
+
+repeat {
+    c = c + 1;
+} until (c > 10);

@@ -294,7 +294,7 @@ while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symb
 for_stmt : FOR LPAREN assignment SEMI expr {Symbol *s = void_to_symbol($5); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num);} SEMI assignment RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
             ;
 
-repeat_stmt : REPEAT LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);}  RPAREN SEMI
+repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);}  RPAREN SEMI
             ;
         
 print_stmt : PRINT LPAREN expr RPAREN {
