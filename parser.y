@@ -236,7 +236,7 @@ expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((voi
         | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); one_op("NOT") ;}
         | LPAREN expr RPAREN    {Symbol s = *void_to_symbol($2); void *v= (void*)&s; $$ = copy_void(v);}
         | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}  // TODO
-        | INT                   {printf("test1\n");char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v);printf("test2\n"); push(val_copy);}
+        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v); push(val_copy);}
         | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v); push(val_copy);}
         | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);check_always_false($1); push(val_copy);}
         | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v; push(val_copy);}
@@ -539,7 +539,8 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     }
 
     // symbol not found
-    return NULL;
+    printf("Error: symbol '%s' not found\n", name);
+    exit(1);
 }
 
 Symbol add_op(void *a, void *b) {
@@ -857,4 +858,4 @@ int main (void) {
         return 0;
 }
 
-void yyerror (char *s) {fprintf (stderr, "error: %s\n", s);} 
+void yyerror (char *s) {fprintf (stderr, "error in line %d: %s\n", line_num, s);} 
