@@ -141,6 +141,7 @@
         void pop_labels(int num);
         void jump(bool add_label_flag, int label_offset);
         void jump_zero(bool add_label_flag);
+        void jump_not_zero(bool add_label_flag);
         void print_label(bool add_label_flag, int label_offset);
         void jump_break();
 
@@ -278,15 +279,15 @@ declare : type ID {
                 }
         ;
 
-else_if_stmt : ELSEIF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE  {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} else_if_stmt
-             | else_if_stmt ELSE LBRACE  {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
+else_if_stmt : ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);} else_if_stmt
+             | else_if_stmt ELSE {jump(true, 1); print_label(false, 2);} LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
              | {printf("%d %s" , line_num , "empty else if stmt\n");}
              ;
 
-if_stmt  : IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
-         | ELSE LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
-         | ELSEIF LPAREN expr RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} else_if_stmt
-         | ENDIF
+if_stmt  : IF LPAREN expr {jump_zero(true); Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
+         | ELSE {jump(true, 1); print_label(false, 2);} LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
+         | ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);} else_if_stmt
+         | ENDIF {print_label(false, 1); pop_labels(1);}
          ;
 
 while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
@@ -295,7 +296,7 @@ while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symb
 for_stmt : FOR LPAREN assignment SEMI expr {Symbol *s = void_to_symbol($5); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num);} SEMI assignment RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
             ;
 
-repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);}  RPAREN SEMI
+repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_not_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);}  RPAREN SEMI
             ;
         
 print_stmt : PRINT LPAREN expr RPAREN {
@@ -825,6 +826,13 @@ void jump_zero(bool add_label_flag) {
                 add_label();
         }
         sprintf(Quads[QuadsIndex++], "JUMPZERO %s ", labelStack[labelStackIndex-1]);
+}
+
+void jump_not_zero(bool add_label_flag) {
+        if (add_label_flag) {
+                add_label();
+        }
+        sprintf(Quads[QuadsIndex++], "JUMPNONZERO %s ", labelStack[labelStackIndex-1]);
 }
 
 void print_label(bool add_label_flag, int label_offset) {

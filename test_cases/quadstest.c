@@ -9,8 +9,18 @@ bool bo     = true;
 
 string s =  "MangaCC";
 
-while (a > b) {
-    c = c % 2; 
+if (a > b) {
+    c = c % 2;
+} else {
+    c = c / 2;
+}
+
+if (a < 2) {
+    bo = false;
+} endif
+
+while (a > 0) {
+    a = a - 1;
 }
 
 repeat {
