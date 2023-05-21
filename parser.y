@@ -126,9 +126,10 @@
         int tempRegIndex = 0 ;
 
         // quads functions 
-        void push() ;
+        void push(char *s);
+        void push_id(char *s);
         void push_value(char * value) ;
-        void pop() ;
+        void pop(char *s);
         void one_op(char * op) ;
         void two_op(char * op) ;   
 
@@ -223,10 +224,10 @@ expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((voi
         | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); one_op("NOT") ;}
         | LPAREN expr RPAREN    {Symbol s = *void_to_symbol($2); void *v= (void*)&s; $$ = copy_void(v);}
         | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}  // TODO
-        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v);push($1);}
-        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v); push($1);}
-        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);check_always_false($1); push($1);}
-        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v; push($1);}
+        | INT                   {printf("test1\n");char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v);printf("test2\n"); push(val_copy);}
+        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v); push(val_copy);}
+        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);check_always_false($1); push(val_copy);}
+        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v; push(val_copy);}
         | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;printf("ID: %s Marked as Used \n", s->name); void *v= (void*)s; $$ = copy_void(v); push($1);}
         ;
 
@@ -234,18 +235,18 @@ enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_
          | INT  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
          ;
 
-assignment : type ID ASSIGN expr {
-                Symbol* s = void_to_symbol($4);
+assignment : type ID {push_id($2);} ASSIGN expr {
+                Symbol* s = void_to_symbol($5);
                 check_assignment_types($1, s, line_num,0);
                 add_symbol(stack, $2, $1, s->value, line_num, false, false, false, false, NULL);
-                push($2); // push the ID to the stack
+                
                 pop(QuadStack[QuadStackIndex-2]);
                 }
-              | ID ASSIGN { push($1);} expr {
+              | ID ASSIGN { push_id($1);} expr {
                 assign_value($1,$4);
                 pop(QuadStack[QuadStackIndex-2]);
                 }
-              | CONST type ID { push($3);} ASSIGN expr {
+              | CONST type ID { push_id($3);} ASSIGN expr {
                 Symbol* s = void_to_symbol($6);
                 add_symbol(stack, $3, $2, s->value, line_num, true, false, false, false, NULL);
                 pop(QuadStack[QuadStackIndex-2]);
@@ -258,7 +259,7 @@ assignment : type ID ASSIGN expr {
 
 declare : type ID {
                 add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL);
-                push($2); // push the ID to the stack
+                push_id($2); // push the ID to the stack
                 }
         | ENUM ID ID {
                 add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false, false, NULL);
@@ -759,9 +760,16 @@ void check_unused_variables() {
 
 /// Quads functions
 void push(char *s) {
+        printf("push \n");
         printf("push %s\n", s);
         strcpy(QuadStack[QuadStackIndex++] , s); 
         sprintf(Quads[QuadsIndex++], "PUSH %s "  , s); 
+}
+
+void push_id(char *s) {
+        printf("push \n");
+        printf("push %s\n", s);
+        strcpy(QuadStack[QuadStackIndex++] , s); 
 }
 
 void pop(char *s) {

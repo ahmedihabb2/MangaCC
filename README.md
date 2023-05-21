@@ -179,4 +179,4 @@
 
 - switch and if statements handling (Anwar)
 
-- Handle arguments with null values
+- Handle arguments with null values and check types of operands with boolean operations

@@ -1,3 +1,10 @@
-int x = 2 ;
-int y = 3 ;
-int z = x + y ;
+int a = 2;
+const int b = 3;
+
+
+int c = a + b;
+float d = 4.5 * 6.5;
+
+bool bo     = true;
+
+string s =  "MangaCC";
