@@ -14,23 +14,48 @@ PUSH 1
 POP bo 
 PUSH "MangaCC" 
 POP s 
-L0: 
 PUSH a 
 PUSH b 
 GT a b t2 
-JUMPZERO L1 
 PUSH c 
 PUSH 2 
 MOD c 2 t3 
 POP c 
-JUMP L0 
-L1: 
-L2: 
+PUSH a 
+PUSH b 
+GT a b t4 
+PUSH c 
+PUSH 2 
+MOD c 2 t5 
+POP c 
+PUSH c 
+PUSH 2 
+MUL c 2 t6 
+POP c 
+PUSH a 
+PUSH b 
+GT a b t7 
+PUSH c 
+PUSH 2 
+MOD c 2 t8 
+POP c 
+PUSH a 
+PUSH b 
+LT a b t9 
+PUSH c 
+PUSH 2 
+MUL c 2 t10 
+POP c 
+PUSH c 
+PUSH 3 
+MUL c 3 t11 
+POP c 
+L0: 
 PUSH c 
 PUSH 1 
-ADD c 1 t4 
+ADD c 1 t12 
 POP c 
 PUSH c 
 PUSH 10 
-GT c 10 t5 
-JUMPZERO L2 
+GT c 10 t13 
+JUMPZERO L0 
