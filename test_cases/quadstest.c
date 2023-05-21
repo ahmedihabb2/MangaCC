@@ -9,6 +9,6 @@ bool bo     = true;
 
 string s =  "MangaCC";
 
-if (a > b) {
+while (a > b) {
     c = c % 2; 
-} endif
+}

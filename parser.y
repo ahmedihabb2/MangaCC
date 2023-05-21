@@ -288,7 +288,7 @@ if_stmt  : IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression
          | IF LPAREN expr {Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} ELSEIF LPAREN expr RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} else_if_stmt
          ;
 
-while_stmt : WHILE LPAREN expr {Symbol *s = void_to_symbol($3); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
+while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
            ;
            
 for_stmt : FOR LPAREN assignment SEMI expr {Symbol *s = void_to_symbol($5); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num);} SEMI assignment RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
@@ -816,7 +816,7 @@ void jump(bool add_label_flag, int label_offset) {
         if (add_label_flag) {
                 add_label();
         }
-        sprintf(Quads[QuadsIndex++], "JUMP %s ", labelStack[labelStackIndex-1-label_offset]);
+        sprintf(Quads[QuadsIndex++], "JUMP %s ", labelStack[labelStackIndex-label_offset]);
 }
 
 void jump_zero(bool add_label_flag) {
@@ -830,7 +830,7 @@ void print_label(bool add_label_flag, int label_offset) {
         if (add_label_flag) {
                 add_label();
         }
-        sprintf(Quads[QuadsIndex++], "%s: ", labelStack[labelStackIndex-1-label_offset]);
+        sprintf(Quads[QuadsIndex++], "%s: ", labelStack[labelStackIndex-label_offset]);
 }
 
 void jump_break() {

@@ -14,10 +14,14 @@ PUSH 1
 POP bo 
 PUSH "MangaCC" 
 POP s 
+L0: 
 PUSH a 
 PUSH b 
 GT a b t2 
+JUMPZERO L1 
 PUSH c 
 PUSH 2 
 MOD c 2 t3 
 POP c 
+JUMP L0 
+L1: 

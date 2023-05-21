@@ -1,3 +1,9 @@
+print(5);
+print(5);
+
+int a = 2;
+const int b = 3;
+
 if (a < b) {
     int k = 5;
 } endif
@@ -70,4 +76,4 @@ if (1) {
 } endif
  
 
-// if (a > b) int k = 5;
+if (a > b) int k = 5;
