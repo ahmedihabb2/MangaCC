@@ -364,7 +364,7 @@ func_call_stmt : ID {
         } RPAREN
                ;
 
-switch_stmt : SWITCH LPAREN expr RPAREN LBRACE case_stmt RBRACE
+switch_stmt : SWITCH LPAREN expr  {Symbol *s = void_to_symbol($3); printf("switch expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} case_stmt RBRACE {pop_symbol_table(stack);}
             ;
 
 break_stmt : BREAK
