@@ -138,6 +138,8 @@
 
         // control flow functions
         void add_label();
+        void add_func_label(char* func_name);
+        void pop_func_label();
         void pop_labels(int num);
         void jump(bool add_label_flag, int label_offset);
         void jump_zero(bool add_label_flag);
@@ -265,6 +267,7 @@ assignment : type ID {push_id($2);} ASSIGN expr {
                 pop(QuadStack[QuadStackIndex-2]);
               }
               | ENUM ID ID ASSIGN enum_val {
+                Symbol *enum_symbol = void_to_symbol($2);
                 Symbol* s = void_to_symbol($5);
                 add_symbol(stack, $3, INT_ENUM , s->value, line_num, false, true, false, false, NULL);
               }
@@ -275,6 +278,7 @@ declare : type ID {
                 push_id($2); // push the ID to the stack
                 }
         | ENUM ID ID {
+                Symbol *enum_symbol = get_symbol(stack, $2);
                 add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false, false, NULL);
                 }
         ;
@@ -354,8 +358,8 @@ param_call : | expr COMMA {
 
 
 
-function_stmt : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
-              | VOID ID {add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack);}
+function_stmt : type ID {add_func_label($2); add_symbol(stack, $2, $1, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack); pop_func_label();}
+              | VOID ID {add_func_label($2); add_symbol(stack, $2, VOID_ENUM, 0, line_num, false, false, true, false, create_function_argumetns());} LPAREN {push_symbol_table(stack, create_symbol_table()); last_declared_function = get_symbol(stack, $2)->arguments;} param RPAREN LBRACE body_stmt_list RBRACE {pop_symbol_table(stack); pop_func_label();}
 
 
 
@@ -398,7 +402,7 @@ enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add
           | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false, false, NULL);}
           ;
 
-enum_stmt   : ENUM ID LBRACE enum_body RBRACE {enum_body_count = 0; }
+enum_stmt   : ENUM ID {add_symbol(stack, $2, ENUM_ENUM, 0, line_num, false, true, false, false, NULL);} LBRACE enum_body RBRACE {enum_body_count = 0; }
             ;
 
 return_stmt : RETURN expr
@@ -541,7 +545,7 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     }
 
     // symbol not found
-    printf("Error: symbol '%s' not found\n", name);
+    printf("Error: undefined '%s'\n", name);
     exit(1);
 }
 
@@ -555,14 +559,14 @@ Symbol add_op(void *a, void *b) {
                 int int_val2 = 0;
                 float float_val1 = 0;
                 float float_val2 = 0;
-                if (s1->type == INT_ENUM)
+                if (s1->type == INT_ENUM && s1->value != NULL)
                         int_val1 = atoi(s1->value);
-                else if (s1->type == FLOAT_ENUM)
+                else if (s1->type == FLOAT_ENUM && s1->value != NULL)
                         float_val1 = atof(s1->value);
 
-                if (s2->type == INT_ENUM)
+                if (s2->type == INT_ENUM && s2->value != NULL)
                         int_val2 = atoi(s2->value);
-                else if (s2->type == FLOAT_ENUM)
+                else if (s2->type == FLOAT_ENUM && s2->value != NULL)
                         float_val2 = atof(s2->value);
                 // perform operation
                 if (s1->type == INT_ENUM && s2->type == INT_ENUM) {
@@ -598,14 +602,14 @@ Symbol sub_op(void *a, void *b) {
                 int int_val2 = 0;
                 float float_val1 = 0;
                 float float_val2 = 0;
-                if (s1->type == INT_ENUM)
+                if (s1->type == INT_ENUM && s1->value != NULL)
                         int_val1 = atoi(s1->value);
-                else if (s1->type == FLOAT_ENUM)
+                else if (s1->type == FLOAT_ENUM && s1->value != NULL)
                         float_val1 = atof(s1->value);
 
-                if (s2->type == INT_ENUM)
+                if (s2->type == INT_ENUM && s2->value != NULL)
                         int_val2 = atoi(s2->value);
-                else if (s2->type == FLOAT_ENUM)
+                else if (s2->type == FLOAT_ENUM && s2->value != NULL)
                         float_val2 = atof(s2->value);
 
                 // perform operation
@@ -653,14 +657,14 @@ Symbol mul_op(void *a, void *b) {
                 int int_val2 = 0;
                 float float_val1 = 0;
                 float float_val2 = 0;
-                if (s1->type == INT_ENUM)
+                if (s1->type == INT_ENUM && s1->value != NULL)
                         int_val1 = atoi(s1->value);
-                else if (s1->type == FLOAT_ENUM)
+                else if (s1->type == FLOAT_ENUM && s1->value != NULL)
                         float_val1 = atof(s1->value);
 
-                if (s2->type == INT_ENUM)
+                if (s2->type == INT_ENUM && s2->value != NULL)
                         int_val2 = atoi(s2->value);
-                else if (s2->type == FLOAT_ENUM)
+                else if (s2->type == FLOAT_ENUM && s2->value != NULL)
                         float_val2 = atof(s2->value);
 
                 // perform operation
@@ -694,17 +698,17 @@ Symbol div_op(void *a, void *b) {
 
                 // convert from string according to symbol type
                 int int_val1 = 0;
-                int int_val2 = 0;
+                int int_val2 = 1;
                 float float_val1 = 0;
-                float float_val2 = 0;
-                if (s1->type == INT_ENUM)
+                float float_val2 = 1.0;
+                if (s1->type == INT_ENUM && s1->value != NULL)
                         int_val1 = atoi(s1->value);
-                else if (s1->type == FLOAT_ENUM)
+                else if (s1->type == FLOAT_ENUM && s1->value != NULL)
                         float_val1 = atof(s1->value);
 
-                if (s2->type == INT_ENUM)
+                if (s2->type == INT_ENUM && s2->value != NULL)
                         int_val2 = atoi(s2->value);
-                else if (s2->type == FLOAT_ENUM)
+                else if (s2->type == FLOAT_ENUM && s2->value != NULL)
                         float_val2 = atof(s2->value);
 
                 // perform operation
@@ -745,8 +749,8 @@ Symbol mod_op(void *a, void *b) {
                 // convert from string according to symbol type
                 int int_val1 = 0;
                 int int_val2 = 0;
-                int_val1 = atoi(s1->value);
-                int_val2 = atoi(s2->value);
+                int_val1 = atoi(s1->value != NULL ? s1->value : "0");
+                int_val2 = atoi(s2->value != NULL ? s2->value : "1");
 
                 sprintf(str_val, "%d", int_val1 % int_val2);
                 s.type = INT_ENUM;
@@ -810,8 +814,16 @@ void add_label() {
         strcpy(labelStack[labelStackIndex++], temp_label);
 }
 
+void add_func_label(char *func_name) {
+        sprintf(Quads[QuadsIndex++], "%s: ", func_name);
+}
+
 void pop_labels(int num) {
         labelStackIndex -= num;
+}
+
+void pop_func_label() {
+        sprintf(Quads[QuadsIndex++], "%s", "return");
 }
 
 void jump(bool add_label_flag, int label_offset) {
