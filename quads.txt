@@ -1,32 +1,17 @@
-PUSH 0 
-POP x 
-PUSH 3 
+PUSH 5.30 
 POP y 
-PUSH 556 
 PUSH y 
-ADD 556 y t0 
+PUSH y 
+POP x 
+PUSH x 
+PUSH y 
+PUSH x 
 POP z 
-PUSH x 
-PUSH 0 
-LT x 0 t1 
-JUMPZERO L0 
-PUSH -1 
-POP x 
-L1: 
-PUSH x 
-PUSH 0 
-GT x 0 t2 
-JUMPZERO L2 
-PUSH x 
-PUSH 1 
-SUB x 1 t3 
-POP x 
-JUMP main2 
-JUMP L1 
-L2: 
-L0: 
 PUSH z 
-PUSH 0 
+PUSH x 
+PUSH 5.60 
+POP x 
+PUSH x 
 
 
 
@@ -34,18 +19,3 @@ PUSH 0
 
 
 
-<<<<<<< HEAD
-func: 
-PUSH 1 
-POP a 
-PUSH 5 
-POP b 
-PUSH a 
-PUSH b 
-ADD a b t1 
-POP c 
-=======
-main2: 
-PUSH 0 
->>>>>>> 6102069db0c6057d8acec47d5371dbbff450b10a
-return

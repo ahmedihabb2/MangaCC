@@ -89,13 +89,14 @@
         char *copy_value(char* value); // copy the value to a new memory address
         void* copy_void(void* value); // copy the value to a new memory address
         Symbol *void_to_symbol(void *v) {return (Symbol*)v;} 
-        void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const);
+        int check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const);
         void add_arguments(Arguments *arguments, int type, char* name);
         void assign_value(char * id  ,void *v);
         void assign_value(char * id  ,void *v );
         void check_unused_variables();
         void check_always_false(int bool_val);
         void check_operand_types (char* op, int left_type, int right_type);
+        Symbol * copy_symbol(Symbol *s);
 
 
         // operrator functions
@@ -257,8 +258,20 @@ enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_
 
 assignment : type ID {push_id($2);} ASSIGN expr {
                 Symbol* s = void_to_symbol($5);
-                check_assignment_types($1, s, line_num,0);
-                add_symbol(stack, $2, $1, s->value, line_num, false, false, false, false, NULL);
+                int conv = check_assignment_types($1, s, line_num,0);
+                char * converted_val = malloc(sizeof(char)*20);
+                if (conv == 0)
+                {
+                        // From float to int
+                        sprintf(converted_val, "%d", (int)atof(s->value));
+                } else if (conv == 1) {
+                        // From int to float
+                        sprintf(converted_val, "%.2f", atof(s->value));
+                } else {
+                        // No conversion needed
+                        sprintf(converted_val, "%s", s->value);
+                }
+                add_symbol(stack, $2, $1, converted_val, line_num, false, false, false, false, NULL);
                 
                 pop(QuadStack[QuadStackIndex-2], inFuncScope);
                 }
@@ -490,19 +503,30 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
 }
 
 
-void check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const)
+int check_assignment_types(int statement_type , Symbol * s , int line_num, bool is_const)
 {
-    if(is_const)
-    {
-        printf("Error: cannot assign a value to const at line %d\n", line_num);
-        exit(1);
-    }
-    if (statement_type != s->type)
-    {
-        printf("Error: type mismatch in assignment at line %d\n", line_num);
-        exit(1);
-    } 
-    return ;
+        if(is_const)
+        {
+                printf("Error: cannot assign a value to const at line %d\n", line_num);
+                exit(1);
+        }
+        // Apply type conversion from int to float and vice versa
+        if (statement_type == INT_ENUM && s->type == FLOAT_ENUM)
+        {
+                printf("Warning: type conversion from float to int at line %d\n", line_num);
+                return 0;
+        }
+        else if (statement_type == FLOAT_ENUM && s->type == INT_ENUM)
+        {
+                printf("Warning: type conversion from int to float at line %d\n", line_num);
+                return 1;
+        }
+        else if (statement_type != s->type)
+        {
+                printf("Error: type mismatch in assignment at line %d\n", line_num);
+                exit(1);
+        }
+        return -1;
 }
 
 void check_operand_types (char* op, int left_type, int right_type)
@@ -664,14 +688,26 @@ Symbol sub_op(void *a, void *b) {
 }
 
 void assign_value(char * id  ,void *v ) {
-    Symbol* s = void_to_symbol(v);
-    Symbol* lhs_symbol = get_symbol(stack, id);
-    if (lhs_symbol == NULL) {
-        printf("Error: variable %s not declared in line %d\n", id, line_num);
-        exit(1);
-    }
-    check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
-    lhs_symbol->value = copy_value(s->value);
+        Symbol* s = void_to_symbol(v);
+        Symbol* lhs_symbol = get_symbol(stack, id);
+        if (lhs_symbol == NULL) {
+                printf("Error: variable %s not declared in line %d\n", id, line_num);
+                exit(1);
+        }
+        int conv = check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
+        char * converted_val = malloc(sizeof(char)*20);
+        if (conv == 0)
+        {
+                // From float to int
+                sprintf(converted_val, "%d", (int)atof(s->value));
+        } else if (conv == 1) {
+                // From int to float
+                sprintf(converted_val, "%.2f", atof(s->value));
+        } else {
+                // No conversion needed
+                sprintf(converted_val, "%s", s->value);
+        }
+        lhs_symbol->value = copy_value(converted_val);
 }
 
 Symbol mul_op(void *a, void *b) {
