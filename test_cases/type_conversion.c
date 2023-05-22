@@ -6,5 +6,9 @@ print(y);
 float z = x;
 print(z);
 print(x);
-x = 5.6;
+x = 8;
+{
+    string x = "hello";
+    print(x);
+}
 print(x);

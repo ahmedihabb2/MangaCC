@@ -97,6 +97,7 @@
         void check_always_false(int bool_val);
         void check_operand_types (char* op, int left_type, int right_type);
         Symbol * copy_symbol(Symbol *s);
+        void print_symbol_table();
 
 
         // operrator functions
@@ -156,6 +157,7 @@
 
         // quads helper
         void QuadsToFile(char * filename) ;
+        FILE *st ;
 
 
 %}
@@ -498,8 +500,21 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
     char* val_copy = copy_value(value);
 
     Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func , is_used, arguments};
-
     table->symbols[table->num_symbols++] = symbol;
+    print_symbol_table();
+}
+
+void print_symbol_table()
+{
+        fprintf(st,"name, type, value, line, is_const, is_enum, is_func , is_used\n");
+        for (int i = stack->num_tables - 1; i>=0 ; i--) {
+        SymbolTable *table = stack->tables[i];
+        for (int j = 0; j < table->num_symbols; j++) {
+                fprintf(st,"%s, %d, %s, %d, %d, %d, %d, %d\n",table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used);
+                }
+        }
+        fprintf(st,"==================================================================================================\n");
+
 }
 
 
@@ -708,6 +723,7 @@ void assign_value(char * id  ,void *v ) {
                 sprintf(converted_val, "%s", s->value);
         }
         lhs_symbol->value = copy_value(converted_val);
+        print_symbol_table();
 }
 
 Symbol mul_op(void *a, void *b) {
@@ -961,11 +977,10 @@ void QuadsToFile(char * filename) {
 int main (void) {
         stack = create_symbol_table_stack();
         push_symbol_table(stack, create_symbol_table());
-
+        st = fopen("symbol_table.txt", "w");
         yyparse ();
-        
         QuadsToFile("quads.txt");
-
+        fclose(st);
         return 0;
 }
 

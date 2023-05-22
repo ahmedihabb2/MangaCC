@@ -9,8 +9,11 @@ PUSH x
 POP z 
 PUSH z 
 PUSH x 
-PUSH 5.60 
+PUSH 8 
 POP x 
+PUSH "hello" 
+POP x 
+PUSH x 
 PUSH x 
 
 
