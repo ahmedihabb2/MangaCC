@@ -1,17 +1,13 @@
 import Alert from '@mui/material/Alert';
 import './Logs.css'
 
-const Logs = () => {
+const Logs = ({ warnings, errors }) => {
     return (
         <div className="logs">
             <h2>Logs</h2>
             <div className="logs-content">
-                <Alert severity="error">This is an error alert — check it out!</Alert>
-                <Alert severity="warning">This is a warning alert — check it out!</Alert>
-                <Alert severity="error">This is an error alert — check it out!</Alert>
-                <Alert severity="warning">This is a warning alert — check it out!</Alert>
-                <Alert severity="error">This is an error alert — check it out!</Alert>
-                <Alert severity="warning">This is a warning alert — check it out!</Alert>
+                {warnings && warnings.map((warning, i) => <Alert key={i} severity="warning">{warning}</Alert>)}
+                {errors && errors.map((error, i) => <Alert key={i} severity="error">{error}</Alert>)}
             </div>
         </div>
     );

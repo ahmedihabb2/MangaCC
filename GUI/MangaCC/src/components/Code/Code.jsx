@@ -9,7 +9,7 @@ import 'prismjs/components/prism-c'
 import 'prismjs/components/prism-cpp'
 import 'prismjs/themes/prism.css';
 import './Code.css'
-const Code = ({ code, setCode }) => {
+const Code = ({ code, setCode, setStatus }) => {
 
     const hightlightWithLineNumbers = (input, language) =>
         highlight(input, language)
@@ -19,7 +19,10 @@ const Code = ({ code, setCode }) => {
     return (
         <Editor
             value={code}
-            onValueChange={code => setCode(code)}
+            onValueChange={code => {
+                setStatus('Editing')
+                setCode(code)
+            }}
             highlight={code => hightlightWithLineNumbers(code, languages.cpp)}
             padding={10}
             textareaId="codeArea"

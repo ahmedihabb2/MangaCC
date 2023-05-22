@@ -1055,4 +1055,7 @@ int main (void) {
         return 0;
 }
 
-void yyerror (char *s) {fprintf (stderr, "error in line %d: %s\n", line_num, s);} 
+void yyerror (char *s) {
+        fprintf (stderr, "error in line %d: %s\n", line_num, s);
+        fprintf (console_logs, "Error: in line %d: %s\n", line_num, s);
+        } 

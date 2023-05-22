@@ -1,6 +1,4 @@
-// Write your code here
-int main() {
-	return 0;
+int main(){
+  int c = 10;
+  int x = 10.1;
 }
-
-int x = 9;
