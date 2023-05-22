@@ -94,7 +94,7 @@
         void assign_value(char * id  ,void *v);
         void assign_value(char * id  ,void *v );
         void check_unused_variables();
-        void check_always_false(int bool_val);
+        void check_always_false( Symbol *s);
         void check_operand_types (char* op, int left_type, int right_type);
         Symbol * copy_symbol(Symbol *s);
         void print_symbol_table();
@@ -313,19 +313,19 @@ else_if_stmt : ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN
              | {printf("%d %s" , line_num , "empty else if stmt\n");}
              ;
 
-if_stmt  : IF LPAREN expr {jump_zero(true); Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(atoi(s->value));} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} if_stmt
+if_stmt  : IF LPAREN expr {jump_zero(true); Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(s);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} if_stmt
          | ELSE {jump(true, 1); print_label(false, 2);} LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
-         | ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN LBRACE {Symbol *s = void_to_symbol($4);push_symbol_table(stack, create_symbol_table(s->value));check_always_false(atoi(s->value));} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);} else_if_stmt
+         | ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN LBRACE {Symbol *s = void_to_symbol($4);push_symbol_table(stack, create_symbol_table(s->value));check_always_false(s);} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);} else_if_stmt
          | ENDIF {print_label(false, 1); pop_labels(1);}
          ;
 
-while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true);check_always_false(atoi(s->value));} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
+while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true);check_always_false(s);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
            ;
            
-for_stmt : FOR LPAREN assignment SEMI {print_label(true, 1);} expr {Symbol *s = void_to_symbol($6); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true); check_always_false(atoi(s->value));} SEMI {inForScope = true;} assignment {inForScope = false;} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {fill_quad_stack_from_for_buffer(); jump(false, 2); print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
+for_stmt : FOR LPAREN assignment SEMI {print_label(true, 1);} expr {Symbol *s = void_to_symbol($6); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true); check_always_false(s);} SEMI {inForScope = true;} assignment {inForScope = false;} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {fill_quad_stack_from_for_buffer(); jump(false, 2); print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
             ;
 
-repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_not_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(atoi(s->value));}  RPAREN SEMI
+repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_not_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(s);}  RPAREN SEMI
             ;
         
 print_stmt : PRINT LPAREN expr RPAREN {
@@ -600,12 +600,12 @@ void check_operand_types (char* op, int left_type, int right_type)
         }
 }
 
-void check_always_false(int bool_val) {
-    if (bool_val == 0){
+void check_always_false(Symbol *s) {
+    if (atoi(s->value) == 0 && s->type == BOOL_ENUM && s->name == NULL){
         printf("Warning: condition is always false at line %d\n", line_num);
         fprintf(console_logs,"Warning: condition is always false at line %d\n", line_num);
     }
-    return ;
+    return;
 }
 
 
@@ -898,7 +898,7 @@ void check_unused_variables() {
         for (int j = 0; j < table->num_symbols; j++) {
             if (table->symbols[j].is_used == 0 && table->symbols[j].is_func == 0) {
                 printf("Warning: variable %s declared but not used\n", table->symbols[j].name);
-                fprintf(output_file, "Warning: variable %s declared but not used\n", table->symbols[j].name);
+                fprintf(console_logs, "Warning: variable %s declared but not used\n", table->symbols[j].name);
             }
         }
 }
