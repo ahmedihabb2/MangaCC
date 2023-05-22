@@ -114,6 +114,29 @@
         int enum_body_count = 0 ;
         Arguments *last_declared_function = NULL;
         int func_param_count = 0;
+
+
+        // quadratic data 
+        char QuadStack [10000][50];
+        int QuadStackIndex = 0;
+        
+        char Quads [10000][100];
+        int QuadsIndex = 0;
+
+        int tempRegIndex = 0 ;
+
+        // quads functions 
+        void push(char *s);
+        void push_id(char *s);
+        void push_value(char * value) ;
+        void pop(char *s);
+        void one_op(char * op) ;
+        void two_op(char * op) ;   
+
+        // quads helper
+        void QuadsToFile(char * filename) ;
+
+
 %}
 
 %union{
@@ -184,45 +207,49 @@ body_stmt_list : stmt body_stmt_list
           ;
 
 
-expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));}
-        | expr MINUS expr       {Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));}
-        | expr TIMES expr       {Symbol s = mul_op($1, $3); $$ = copy_void(((void*)&s));}
-        | expr DIV expr         {Symbol s = div_op($1, $3); $$ = copy_void(((void*)&s));}
-        | expr MOD expr         {Symbol s = mod_op($1, $3); $$ = copy_void(((void*)&s));}
-        | expr AND expr         {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr OR expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr NE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr LT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr GT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr LE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr GE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | expr XOR expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
+expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));two_op("ADD") ;}
+        | expr MINUS expr       {Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));two_op("SUB") ;}
+        | expr TIMES expr       {Symbol s = mul_op($1, $3); $$ = copy_void(((void*)&s));two_op("MUL") ;}
+        | expr DIV expr         {Symbol s = div_op($1, $3); $$ = copy_void(((void*)&s));two_op("DIV") ;}
+        | expr MOD expr         {Symbol s = mod_op($1, $3); $$ = copy_void(((void*)&s));two_op("MOD") ;}
+        | expr AND expr         {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("AND") ;}
+        | expr OR expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("OR") ;}
+        | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("EQ") ;}
+        | expr NE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("NE") ;}
+        | expr LT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LT") ;}
+        | expr GT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GT") ;}
+        | expr LE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LE") ;}
+        | expr GE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GE") ;}
+        | expr XOR expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("XOR") ;}
+        | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); one_op("NOT") ;}
         | LPAREN expr RPAREN    {Symbol s = *void_to_symbol($2); void *v= (void*)&s; $$ = copy_void(v);}
         | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}  // TODO
-        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v);}
-        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);check_always_false($1);}
-        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v;}
-        | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;printf("ID: %s Marked as Used \n", s->name); void *v= (void*)s; $$ = copy_void(v);}
+        | INT                   {printf("test1\n");char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v);printf("test2\n"); push(val_copy);}
+        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v); push(val_copy);}
+        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v);check_always_false($1); push(val_copy);}
+        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v; push(val_copy);}
+        | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;printf("ID: %s Marked as Used \n", s->name); void *v= (void*)s; $$ = copy_void(v); push($1);}
         ;
 
 enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
          | INT  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
          ;
 
-assignment : type ID ASSIGN expr {
-                Symbol* s = void_to_symbol($4);
+assignment : type ID {push_id($2);} ASSIGN expr {
+                Symbol* s = void_to_symbol($5);
                 check_assignment_types($1, s, line_num,0);
                 add_symbol(stack, $2, $1, s->value, line_num, false, false, false, false, NULL);
+                
+                pop(QuadStack[QuadStackIndex-2]);
                 }
-              | ID ASSIGN expr {
-                assign_value($1,$3);
+              | ID ASSIGN { push_id($1);} expr {
+                assign_value($1,$4);
+                pop(QuadStack[QuadStackIndex-2]);
                 }
-              | CONST type ID ASSIGN expr {
-                Symbol* s = void_to_symbol($5);
+              | CONST type ID { push_id($3);} ASSIGN expr {
+                Symbol* s = void_to_symbol($6);
                 add_symbol(stack, $3, $2, s->value, line_num, true, false, false, false, NULL);
+                pop(QuadStack[QuadStackIndex-2]);
               }
               | ENUM ID ID ASSIGN enum_val {
                 Symbol* s = void_to_symbol($5);
@@ -232,6 +259,7 @@ assignment : type ID ASSIGN expr {
 
 declare : type ID {
                 add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL);
+                push_id($2); // push the ID to the stack
                 }
         | ENUM ID ID {
                 add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false, false, NULL);
@@ -730,13 +758,65 @@ void check_unused_variables() {
         }
 }
 
+/// Quads functions
+void push(char *s) {
+        printf("push \n");
+        printf("push %s\n", s);
+        strcpy(QuadStack[QuadStackIndex++] , s); 
+        sprintf(Quads[QuadsIndex++], "PUSH %s "  , s); 
+}
+
+void push_id(char *s) {
+        printf("push \n");
+        printf("push %s\n", s);
+        strcpy(QuadStack[QuadStackIndex++] , s); 
+}
+
+void pop(char *s) {
+       printf("pop %s\n", s);
+       --QuadStackIndex;
+       sprintf(Quads[QuadsIndex++], "POP %s "  , s);
+}
+
+void one_op(char * op) {
+        printf("%s one\n", op);
+        char * arg = strdup(QuadStack[--QuadStackIndex]);
+        char tempReg[10];       
+        sprintf(tempReg, "t%d", tempRegIndex++);
+        strcpy(QuadStack[QuadStackIndex++], tempReg);
+        sprintf(Quads[QuadsIndex++], "%s %s %s ", op, arg, QuadStack[QuadStackIndex-1]);
+}
+
+void two_op(char* op) {
+        printf("%s two\n", op);
+        char * arg1 = strdup(QuadStack[QuadStackIndex-2]);
+        char * arg2 = strdup(QuadStack[QuadStackIndex-1]);
+        QuadStackIndex-= 2;
+        char tempReg[10];
+        sprintf(tempReg, "t%d", tempRegIndex++);
+        strcpy(QuadStack[QuadStackIndex++], tempReg);
+        sprintf(Quads[QuadsIndex++], "%s %s %s %s ", op, arg1, arg2, QuadStack[QuadStackIndex-1]);
+}
+
+void QuadsToFile(char * filename) {
+        FILE * fp;
+        fp = fopen(filename, "w");
+        for (int i = 0; i < QuadsIndex; i++) {
+                fprintf(fp, "%s\n", Quads[i]);
+        }
+        fclose(fp);
+}
+
 
 int main (void) {
         stack = create_symbol_table_stack();
         push_symbol_table(stack, create_symbol_table());
 
+        yyparse ();
         
-	return yyparse ( );
+        QuadsToFile("quads.txt");
+
+        return 0;
 }
 
 void yyerror (char *s) {fprintf (stderr, "error: %s\n", s);} 

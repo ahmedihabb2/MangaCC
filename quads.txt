@@ -1,0 +1,16 @@
+PUSH 2 
+POP a 
+PUSH 3 
+POP b 
+PUSH a 
+PUSH b 
+ADD a b t0 
+POP c 
+PUSH 4.50 
+PUSH 6.50 
+MUL 4.50 6.50 t1 
+POP d 
+PUSH 1 
+POP bo 
+PUSH "MangaCC" 
+POP s 
