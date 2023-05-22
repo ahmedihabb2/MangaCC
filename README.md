@@ -1,3 +1,7 @@
+# MangaCC
+
+![MangaCC](https://github.com/ahmedihabb2/MangaCC/assets/57008633/feb3d47a-321a-4c06-b56d-82cdac11484f)
+
 # Language Descriptions
 
 ## Tokens 
