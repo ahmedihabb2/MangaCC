@@ -205,32 +205,32 @@
 program :  stmt_list {pop_symbol_table(stack);}
         ;
 
-stmt    : expr SEMI // {printf("%d %s" , line_num , "expr\n");}
-        | if_stmt  {printf("%d %s" , line_num , "if\n");}
-        | assignment SEMI // {printf("%d %s" , line_num , "assignment\n");}
-        | while_stmt {printf("%d %s" , line_num , "while\n");}
-        | repeat_stmt {printf("%d %s" , line_num , "repeat\n");}
-        | print_stmt SEMI // {printf("%d %s" , line_num , "print\n");}
-        | for_stmt {printf("%d %s" , line_num , "for\n");}
-        | switch_stmt {printf("%d %s" , line_num , "switch\n");}
-        | break_stmt SEMI {printf("%d %s" , line_num , "break\n");}
-        | block_stmt // {printf("%d %s" , line_num , "block\n");}
-        | enum_stmt SEMI {printf("%d %s" , line_num , "enum\n");}
-        | return_stmt SEMI {printf("%d %s" , line_num , "return\n");}
-        | CONTINUE SEMI {printf("%d %s" , line_num , "continue\n");}
-        | declare SEMI // { printf("%d %s" , line_num , "declare\n");}
-        | func_call_stmt SEMI {printf("%d %s" , line_num , "function call\n");}
+stmt    : expr SEMI 
+        | if_stmt 
+        | assignment SEMI 
+        | while_stmt
+        | repeat_stmt
+        | print_stmt SEMI 
+        | for_stmt
+        | switch_stmt
+        | break_stmt SEMI
+        | block_stmt
+        | enum_stmt SEMI
+        | return_stmt SEMI
+        | CONTINUE SEMI
+        | declare SEMI
+        | func_call_stmt SEMI
         ;
 
 stmt_list : stmt stmt_list 
           | function_stmt stmt_list
           | stmt
-          | {printf("%d %s" , line_num , "empty stmt list\n");}
+          | 
           ;
 
 body_stmt_list : stmt body_stmt_list 
           | stmt
-          | {printf("%d %s" , line_num , "empty body stmt list\n");}
+          | 
           ;
 
 
@@ -255,7 +255,7 @@ expr    : expr PLUS expr        {Symbol *op1 = void_to_symbol($1);Symbol *op2 = 
         | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM;s.name = NULL; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
         | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM;s.name = NULL; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
         | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; s.name = NULL; void *v= (void*)&s; $$ = v; push(val_copy, inFuncScope);}
-        | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;printf("ID: %s Marked as Used \n", s->name); void *v= (void*)s; $$ = copy_void(v); push($1, inFuncScope);}
+        | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;void *v= (void*)s; $$ = copy_void(v); push($1, inFuncScope);}
         ;
 
 enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
@@ -310,27 +310,26 @@ declare : type ID {
 
 else_if_stmt : ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);} else_if_stmt
              | else_if_stmt ELSE {jump(true, 1); print_label(false, 2);} LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
-             | {printf("%d %s" , line_num , "empty else if stmt\n");}
+             |
              ;
 
-if_stmt  : IF LPAREN expr {jump_zero(true); Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(s);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} if_stmt
+if_stmt  : IF LPAREN expr {jump_zero(true); Symbol *s = void_to_symbol($3);check_always_false(s);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} if_stmt
          | ELSE {jump(true, 1); print_label(false, 2);} LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
          | ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN LBRACE {Symbol *s = void_to_symbol($4);push_symbol_table(stack, create_symbol_table(s->value));check_always_false(s);} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);} else_if_stmt
          | ENDIF {print_label(false, 1); pop_labels(1);}
          ;
 
-while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true);check_always_false(s);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
+while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); jump_zero(true);check_always_false(s);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
            ;
            
-for_stmt : FOR LPAREN assignment SEMI {print_label(true, 1);} expr {Symbol *s = void_to_symbol($6); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true); check_always_false(s);} SEMI {inForScope = true;} assignment {inForScope = false;} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {fill_quad_stack_from_for_buffer(); jump(false, 2); print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
+for_stmt : FOR LPAREN assignment SEMI {print_label(true, 1);} expr {Symbol *s = void_to_symbol($6); jump_zero(true); check_always_false(s);} SEMI {inForScope = true;} assignment {inForScope = false;} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {fill_quad_stack_from_for_buffer(); jump(false, 2); print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
             ;
 
-repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_not_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(s);}  RPAREN SEMI
+repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_not_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); check_always_false(s);}  RPAREN SEMI
             ;
         
 print_stmt : PRINT LPAREN expr RPAREN {
         Symbol* s = void_to_symbol($3);
-        printf("print %d: %s\n" , line_num , s->value);
         }
         ;
 
@@ -341,9 +340,9 @@ type : INTTYPE {$$ = INT_ENUM;}
      | ENUM {$$ = ENUM_ENUM;}
      ;
 
-param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); printf("%s\n", s.name); add_arguments(last_declared_function, s.type, s.name);}
+param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type, s.name);}
       | type ID COMMA {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type, s.name);} param
-      |  {printf("%d %s" , line_num , "empty param list\n");}
+      |
       ;     
 
 param_call : | expr COMMA {
@@ -363,7 +362,6 @@ param_call : | expr COMMA {
                 } else {
                         // Mark the symbol as used
                         s->is_used = true;
-                        printf("ID: %s Marked as Used \n", s->name);
                 }
                 } param_call 
              | expr {
@@ -383,10 +381,9 @@ param_call : | expr COMMA {
                 } else {
                         // Mark the symbol as used
                         s->is_used = true;
-                        printf("ID: %s Marked as Used \n", s->name);
                 }
              }
-             | {printf("empty param call list\n");}
+             | 
              ;
 
 
@@ -408,7 +405,6 @@ func_call_stmt : ID {
             exit(1);
         }
         } LPAREN param_call {
-                printf("func_param_count: %d\n", func_param_count);
                 if (func_param_count != last_declared_function->num_arguments) {
                         printf("Error: number of arguments in function call does not match function definition at line %d: expected: %d but found: %d\n", line_num, last_declared_function->num_arguments, func_param_count);
                         fprintf(console_logs, "Error: number of arguments in function call does not match function definition at line %d: expected: %d but found: %d\n", line_num, last_declared_function->num_arguments, func_param_count);
@@ -418,17 +414,17 @@ func_call_stmt : ID {
         } RPAREN {jump_function($1);}
                ;
 
-switch_stmt : SWITCH LPAREN expr  {Symbol *s = void_to_symbol($3); printf("switch expression evaluation is: %s in line: %d\n", s->value, line_num);} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} case_stmt RBRACE {pop_symbol_table(stack);}
+switch_stmt : SWITCH LPAREN expr  {Symbol *s = void_to_symbol($3); } RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} case_stmt RBRACE {pop_symbol_table(stack);}
             ;
 
 break_stmt : BREAK
-           | {printf("empty break statement\n");}
+           |
            ;
 
 case_stmt :   CASE expr COLON body_stmt_list case_stmt
             | CASE expr COLON body_stmt_list  
             | DEFAULT COLON body_stmt_list  
-            | {printf("empty case statement\n");}
+            | 
             ;
 
 block_stmt : LBRACE { push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
@@ -468,21 +464,6 @@ void pop_symbol_table(SymbolTableStack *stack) {
         fprintf(console_logs, "Error: symbol table stack is empty\n");
         exit(1);
     }
-
-    printf("************************************************************\n");
-    SymbolTable *table = stack->tables[stack->num_tables - 1];
-    printf("end scope %d at line %d\n", table->idnex, line_num);
-    for (int j = 0; j < table->num_symbols; j++) {
-        printf("symbol name: %s, symbol type: %d, symbol value: %s, symbol line: %d, symbol is_const: %d, symbol is_enum: %d, symbol is_func: %d\n", table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func);
-        if (table->symbols[j].is_func) {
-            printf("function arguments: \n");
-            for (int i = 0; i < table->symbols[j].arguments->num_arguments; i++) {
-                printf("%d ", table->symbols[j].arguments->arguments_types[i]);
-            }
-            printf("\n");
-        }
-    }
-    printf("************************************************************\n");
 
     // pop the top symbol table off the stack
     stack->num_tables--;
@@ -642,7 +623,6 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     for (int i = stack->num_tables - 1; i >= 0; i--) {
         SymbolTable *table = stack->tables[i];
         for (int j = 0; j < table->num_symbols; j++) {
-            // printf("line: %i, table: %i, name: %s, address: %x, value: %s\n", line_num, i, table->symbols[j].name, &table->symbols[j], table->symbols[j].value);
             if (strcmp(table->symbols[j].name, name) == 0) {
                 return &table->symbols[j];
             }
