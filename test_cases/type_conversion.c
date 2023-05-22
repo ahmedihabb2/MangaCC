@@ -1,6 +1,6 @@
 float y = 5.3;
 print(y);
-int x = y;
+int x = 6.3;
 print(x);
 print(y);
 float z = x;
@@ -12,3 +12,7 @@ x = 8;
     print(x);
 }
 print(x);
+
+int func(int x, int y) {
+    return x + y;
+}

@@ -247,10 +247,10 @@ expr    : expr PLUS expr        {Symbol *op1 = void_to_symbol($1);Symbol *op2 = 
         | NOT expr              {Symbol *op1 = void_to_symbol($2);check_operand_types("logical" , op1->type,INT_ENUM);char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); one_op("NOT", inFuncScope);}
         | LPAREN expr RPAREN    {Symbol s = *void_to_symbol($2); void *v= (void*)&s; $$ = copy_void(v);}
         | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}  // TODO
-        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
-        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
-        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
-        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; void *v= (void*)&s; $$ = v; push(val_copy, inFuncScope);}
+        | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM;s.name = NULL; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
+        | FLOAT                 {char str_val[20] = ""; sprintf(str_val, "%.2f", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = FLOAT_ENUM;s.name = NULL; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
+        | BOOL                  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM;s.name = NULL; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
+        | STRING                {char* val_copy = copy_value($1); Symbol s; s.value = val_copy; s.type = STRING_ENUM; s.name = NULL; void *v= (void*)&s; $$ = v; push(val_copy, inFuncScope);}
         | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;printf("ID: %s Marked as Used \n", s->name); void *v= (void*)s; $$ = copy_void(v); push($1, inFuncScope);}
         ;
 
@@ -261,7 +261,7 @@ enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_
 assignment : type ID {push_id($2);} ASSIGN expr {
                 Symbol* s = void_to_symbol($5);
                 int conv = check_assignment_types($1, s, line_num,0);
-                char * converted_val = malloc(sizeof(char)*20);
+                char * converted_val = malloc(sizeof(char)*50);
                 if (conv == 0)
                 {
                         // From float to int
@@ -274,7 +274,7 @@ assignment : type ID {push_id($2);} ASSIGN expr {
                         sprintf(converted_val, "%s", s->value);
                 }
                 add_symbol(stack, $2, $1, converted_val, line_num, false, false, false, false, NULL);
-                
+                free (converted_val);
                 pop(QuadStack[QuadStackIndex-2], inFuncScope);
                 }
               | ID ASSIGN { push_id($1);} expr {
@@ -492,7 +492,7 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
     for (int i = 0; i < table->num_symbols; i++) {
         if (strcmp(table->symbols[i].name, name) == 0) {
             printf("Error: symbol '%s' already defined\n", name);
-            return;
+            exit(1);
         }
     }
 
@@ -506,11 +506,12 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
 
 void print_symbol_table()
 {
-        fprintf(st,"name, type, value, line, is_const, is_enum, is_func , is_used\n");
+        fprintf(st,"%d\n",line_num);
+        fprintf(st,"name, type, value, line, is_const, is_enum, is_func , is_used, scope\n");
         for (int i = stack->num_tables - 1; i>=0 ; i--) {
         SymbolTable *table = stack->tables[i];
         for (int j = 0; j < table->num_symbols; j++) {
-                fprintf(st,"%s, %d, %s, %d, %d, %d, %d, %d\n",table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used);
+                fprintf(st,"%s, %d, %s, %d, %d, %d, %d, %d ,%d\n",table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
                 }
         }
         fprintf(st,"==================================================================================================\n");
@@ -529,11 +530,23 @@ int check_assignment_types(int statement_type , Symbol * s , int line_num, bool 
         if (statement_type == INT_ENUM && s->type == FLOAT_ENUM)
         {
                 printf("Warning: type conversion from float to int at line %d\n", line_num);
+                if (s->name == NULL)
+                {
+                        sprintf(Quads[QuadsIndex++], "Convi %s"  , s->value);
+                }else {
+                        sprintf(Quads[QuadsIndex++], "Convi %s"  , s->name);
+                }
                 return 0;
         }
         else if (statement_type == FLOAT_ENUM && s->type == INT_ENUM)
         {
                 printf("Warning: type conversion from int to float at line %d\n", line_num);
+                if (s->name == NULL)
+                {
+                        sprintf(Quads[QuadsIndex++], "Convf %s"  , s->value);
+                }else {
+                        sprintf(Quads[QuadsIndex++], "Convf %s"  , s->name);
+                }
                 return 1;
         }
         else if (statement_type != s->type)
@@ -612,7 +625,7 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
     }
 
     // symbol not found
-    printf("Error: undefined '%s'\n", name);
+    printf("Error: Undefined '%s' at line %d \n", name, line_num);
     exit(1);
 }
 
@@ -710,7 +723,7 @@ void assign_value(char * id  ,void *v ) {
                 exit(1);
         }
         int conv = check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
-        char * converted_val = malloc(sizeof(char)*20);
+        char * converted_val = malloc(sizeof(char)*50);
         if (conv == 0)
         {
                 // From float to int
@@ -724,6 +737,7 @@ void assign_value(char * id  ,void *v ) {
         }
         lhs_symbol->value = copy_value(converted_val);
         print_symbol_table();
+        free(converted_val);
 }
 
 Symbol mul_op(void *a, void *b) {
@@ -981,6 +995,8 @@ int main (void) {
         yyparse ();
         QuadsToFile("quads.txt");
         fclose(st);
+        // free memory
+        free(stack);
         return 0;
 }
 

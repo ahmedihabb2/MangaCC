@@ -1,11 +1,13 @@
 PUSH 5.30 
 POP y 
 PUSH y 
-PUSH y 
+PUSH 6.30 
+Convi 6.30
 POP x 
 PUSH x 
 PUSH y 
 PUSH x 
+Convf x
 POP z 
 PUSH z 
 PUSH x 
@@ -22,3 +24,8 @@ PUSH x
 
 
 
+func: 
+PUSH x 
+PUSH y 
+ADD x y t0 
+return
