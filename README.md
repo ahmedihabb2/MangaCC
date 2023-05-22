@@ -180,3 +180,11 @@
 - switch and if statements handling (Anwar)
 
 - Handle arguments with null values and check types of operands with boolean operations
+
+## Cases to be handled
+
+- nested while loop with if (wrong quadraples)
+
+- Variables with no initial value (Core dump)
+
+- For loop doesn't jump on itself (quadstest.c)

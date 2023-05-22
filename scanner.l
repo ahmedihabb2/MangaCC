@@ -59,8 +59,8 @@
 \/\/.*        {;}
 \n          {line_num++;}
 
-[0-9]+                  {yylval.integer = atoi(yytext); return INT;}
-[0-9]+\.[0-9]+          {yylval.floatval = atof(yytext); return FLOAT;}
+[-]?[0-9]+                  {yylval.integer = atoi(yytext); return INT;}
+[-]?[0-9]+\.[0-9]+          {yylval.floatval = atof(yytext); return FLOAT;}
 [a-zA-Z_][a-zA-Z0-9_]*  {yylval.id = strdup(yytext); return ID;}
 \".*\"                  {yylval.string = strdup(yytext); return STRING;}
 \'.*\'                    {yylval.string = strdup(yytext); return STRING;}

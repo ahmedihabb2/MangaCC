@@ -1,26 +1,43 @@
 PUSH 5 
+POP x 
+PUSH 20 
+POP c 
+L0: 
+PUSH x 
+PUSH 0 
+GT x 0 t0 
+JUMPZERO L1 
+PUSH x 
 PUSH 3 
-GT 5 3 t0 
-PUSH 5 
-POP k 
+GT x 3 t1 
+JUMPZERO L2 
+L3: 
+PUSH x 
+PUSH 0 
+GT x 0 t2 
+JUMPZERO L4 
+PUSH x 
 PUSH 1 
-PUSH 5 
-POP k 
+SUB x 1 t3 
+POP x 
+JUMP L3 
+L4: 
+L2: 
+L5: 
+PUSH c 
 PUSH 1 
-PUSH 5 
-PUSH 3 
-GT 5 3 t1 
-PUSH 5 
-POP k 
-PUSH 1 
-PUSH 5 
-POP k 
-PUSH 1 
-PUSH 5 
-PUSH 3 
-GT 5 3 t2 
-PUSH 5 
-POP k 
-PUSH 1 
-PUSH 5 
-POP k 
+ADD c 1 t4 
+POP c 
+PUSH c 
+PUSH 10 
+GT c 10 t5 
+JUMPNONZERO L5 
+JUMP  
+L0: 
+
+
+
+ hlt 
+
+
+

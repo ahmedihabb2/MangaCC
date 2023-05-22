@@ -2,16 +2,16 @@ int x = 5;
 int y = 3;
 // float y = 13.0;
 
-while (x < y) {
+if (x < y) {
     print("x is less than y");
-}
+} endif
 
 int func(int z, float y, bool x, string s) {
     print(z);
     print("inside func");
 }
 
-x("44", 8.3, 3.6, "hello");
+func(44, 8.3, true, "hello");
 
 
 // print(x);
@@ -64,4 +64,4 @@ print(b xor d);
 int t = 3;
 int f = 5;
 
-print(t + f); // not handled yet
+print(t + f);
