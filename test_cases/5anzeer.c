@@ -1,22 +1,23 @@
-int x = 0 ;
-const int y  = 3 ;
 
-int z = 556 + y ;
-
-int main2() {
-      return 0 ;
-}
-
-int main() {
-    if (x < 0) {
-        x = -1 ;
-        while(x > 0) {
-            x = x - 1 ;
-            main2();
+int main()
+{
+    int x=1;
+    int y=6;
+    while (x > 5)
+    {
+        while (x < 0)
+        {
+            x = -1;
+            while (x > 0)
+            {
+                int z = 5;
+                x = x - 1;
+            }
         }
-    }endif
-    print(z);
-    return 0 ;
+        while (y > 0)
+        {
+            y = y - 1;
+        }
+    }
+    return 0;
 }
-
-

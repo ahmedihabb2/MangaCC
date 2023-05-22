@@ -511,7 +511,7 @@ void print_symbol_table()
         for (int i = stack->num_tables - 1; i>=0 ; i--) {
         SymbolTable *table = stack->tables[i];
         for (int j = 0; j < table->num_symbols; j++) {
-                fprintf(st,"%s, %d, %s, %d, %d, %d, %d, %d ,%d\n",table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
+                fprintf(st,"%s, %d, %s, %d, %d, %d, %d, %d , %d\n",table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
                 }
         }
         fprintf(st,"==================================================================================================\n");

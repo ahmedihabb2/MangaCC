@@ -1,22 +1,48 @@
-PUSH 5.30 
+PUSH 1 
+POP x 
+PUSH 6 
 POP y 
-PUSH y 
-PUSH 6.30 
-Convi 6.30
+L0: 
+PUSH x 
+PUSH 5 
+GT x 5 t0 
+JUMPZERO L1 
+L2: 
+PUSH x 
+PUSH 0 
+LT x 0 t1 
+JUMPZERO L3 
+PUSH -1 
 POP x 
+L4: 
 PUSH x 
-PUSH y 
-PUSH x 
-Convf x
+PUSH 0 
+GT x 0 t2 
+JUMPZERO L5 
+PUSH 5 
 POP z 
-PUSH z 
 PUSH x 
-PUSH 8 
+PUSH 1 
+SUB x 1 t3 
 POP x 
-PUSH "hello" 
-POP x 
-PUSH x 
-PUSH x 
+JUMP L4 
+L5: 
+JUMP L2 
+L3: 
+L6: 
+PUSH y 
+PUSH 0 
+GT y 0 t4 
+JUMPZERO L7 
+PUSH y 
+PUSH 1 
+SUB y 1 t5 
+POP y 
+JUMP L6 
+L7: 
+JUMP L0 
+L1: 
+PUSH 0 
 
 
 
@@ -24,8 +50,3 @@ PUSH x
 
 
 
-func: 
-PUSH x 
-PUSH y 
-ADD x y t0 
-return
