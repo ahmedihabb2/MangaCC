@@ -1,15 +1,32 @@
-PUSH 5 
+PUSH 0 
 POP x 
-PUSH 7 
+PUSH 3 
 POP y 
-PUSH 6 
+PUSH 556 
+PUSH y 
+ADD 556 y t0 
 POP z 
 PUSH x 
+PUSH 0 
+LT x 0 t1 
+JUMPZERO L0 
+PUSH -1 
+POP x 
+L1: 
+PUSH x 
+PUSH 0 
+GT x 0 t2 
+JUMPZERO L2 
+PUSH x 
+PUSH 1 
+SUB x 1 t3 
+POP x 
+JUMP main2 
+JUMP L1 
+L2: 
+L0: 
 PUSH z 
-ADD x z t0 
-POP m 
-PUSH "hello" 
-POP s 
+PUSH 0 
 
 
 
@@ -17,6 +34,7 @@ POP s
 
 
 
+<<<<<<< HEAD
 func: 
 PUSH 1 
 POP a 
@@ -26,4 +44,8 @@ PUSH a
 PUSH b 
 ADD a b t1 
 POP c 
+=======
+main2: 
+PUSH 0 
+>>>>>>> 6102069db0c6057d8acec47d5371dbbff450b10a
 return
