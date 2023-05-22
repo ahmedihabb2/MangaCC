@@ -1,67 +1,15 @@
-PUSH 2 
-POP a 
-PUSH 3 
-POP b 
-PUSH a 
-PUSH b 
-ADD a b t0 
-POP c 
-PUSH 4.50 
-PUSH 6.50 
-MUL 4.50 6.50 t1 
-POP d 
-PUSH 1 
-POP bo 
-PUSH "MangaCC" 
+PUSH 5 
+POP x 
+PUSH 7 
+POP y 
+PUSH 6 
+POP z 
+PUSH x 
+PUSH z 
+ADD x z t0 
+POP m 
+PUSH "hello" 
 POP s 
-PUSH a 
-PUSH b 
-GT a b t2 
-JUMPZERO L0 
-PUSH c 
-PUSH 2 
-MOD c 2 t3 
-POP c 
-JUMP L1 
-L0: 
-PUSH c 
-PUSH 2 
-DIV c 2 t4 
-POP c 
-L1: 
-PUSH a 
-PUSH 2 
-LT a 2 t5 
-JUMPZERO L2 
-PUSH 0 
-POP bo 
-L2: 
-L3: 
-PUSH a 
-PUSH 0 
-GT a 0 t6 
-JUMPZERO L4 
-PUSH a 
-PUSH 1 
-SUB a 1 t7 
-POP a 
-JUMP L3 
-L4: 
-L5: 
-PUSH c 
-PUSH 1 
-ADD c 1 t9 
-POP c 
-PUSH c 
-PUSH 10 
-GT c 10 t10 
-JUMPNONZERO L5 
-PUSH 2 
-POP a 
-PUSH 3 
-POP b 
-JUMP func 
-POP t10 
 
 
 
@@ -70,7 +18,12 @@ POP t10
 
 
 func: 
+PUSH 1 
+POP a 
+PUSH 5 
+POP b 
 PUSH a 
 PUSH b 
-ADD a b t8 
+ADD a b t1 
+POP c 
 return

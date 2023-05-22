@@ -95,6 +95,7 @@
         void assign_value(char * id  ,void *v );
         void check_unused_variables();
         void check_always_false(int bool_val);
+        void check_operand_types (char* op, int left_type, int right_type);
 
 
         // operrator functions
@@ -226,21 +227,21 @@ body_stmt_list : stmt body_stmt_list
           ;
 
 
-expr    : expr PLUS expr        {Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));two_op("ADD", inFuncScope);}
-        | expr MINUS expr       {Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));two_op("SUB", inFuncScope);}
-        | expr TIMES expr       {Symbol s = mul_op($1, $3); $$ = copy_void(((void*)&s));two_op("MUL", inFuncScope);}
-        | expr DIV expr         {Symbol s = div_op($1, $3); $$ = copy_void(((void*)&s));two_op("DIV", inFuncScope);}
-        | expr MOD expr         {Symbol s = mod_op($1, $3); $$ = copy_void(((void*)&s));two_op("MOD", inFuncScope);}
-        | expr AND expr         {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("AND", inFuncScope);}
-        | expr OR expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("OR", inFuncScope);}
-        | expr EQ expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("EQ", inFuncScope);}
-        | expr NE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("NE", inFuncScope);}
-        | expr LT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LT", inFuncScope);}
-        | expr GT expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GT", inFuncScope);}
-        | expr LE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LE", inFuncScope);}
-        | expr GE expr          {char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GE", inFuncScope);}
-        | expr XOR expr         {char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("XOR", inFuncScope);}
-        | NOT expr              {char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); one_op("NOT", inFuncScope);}
+expr    : expr PLUS expr        {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));two_op("ADD", inFuncScope);}
+        | expr MINUS expr       {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));two_op("SUB", inFuncScope);}
+        | expr TIMES expr       {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = mul_op($1, $3); $$ = copy_void(((void*)&s));two_op("MUL", inFuncScope);}
+        | expr DIV expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = div_op($1, $3); $$ = copy_void(((void*)&s));two_op("DIV", inFuncScope);}
+        | expr MOD expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = mod_op($1, $3); $$ = copy_void(((void*)&s));two_op("MOD", inFuncScope);}
+        | expr AND expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("AND", inFuncScope);}
+        | expr OR expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("OR", inFuncScope);}
+        | expr EQ expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("EQ", inFuncScope);}
+        | expr NE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("NE", inFuncScope);}
+        | expr LT expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LT", inFuncScope);}
+        | expr GT expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GT", inFuncScope);}
+        | expr LE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LE", inFuncScope);}
+        | expr GE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GE", inFuncScope);}
+        | expr XOR expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("XOR", inFuncScope);}
+        | NOT expr              {Symbol *op1 = void_to_symbol($2);check_operand_types("logical" , op1->type,INT_ENUM);char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); one_op("NOT", inFuncScope);}
         | LPAREN expr RPAREN    {Symbol s = *void_to_symbol($2); void *v= (void*)&s; $$ = copy_void(v);}
         | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}  // TODO
         | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
@@ -502,6 +503,26 @@ void check_assignment_types(int statement_type , Symbol * s , int line_num, bool
         exit(1);
     } 
     return ;
+}
+
+void check_operand_types (char* op, int left_type, int right_type)
+{
+        if (op == "math")
+        {
+                if ( left_type == STRING_ENUM || right_type == STRING_ENUM)
+                {
+                        printf("Error: type mismatch in math operation at line %d\n strings not allowed", line_num);
+                        exit(1);
+                }
+        } 
+        else if (op == "logical")
+        {
+                if (!((left_type == BOOL_ENUM || left_type ==INT_ENUM ) && (right_type == BOOL_ENUM || right_type ==INT_ENUM )))
+                {
+                        printf("Error: type mismatch in logical operation at line %d\n operands must be int or bool", line_num);
+                        exit(1);
+                }
+        }
 }
 
 void check_always_false(int bool_val) {
