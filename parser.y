@@ -317,7 +317,7 @@ if_stmt  : IF LPAREN expr {jump_zero(true); Symbol *s = void_to_symbol($3); prin
 while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true);check_always_false(atoi(s->value));} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
            ;
            
-for_stmt : FOR LPAREN assignment SEMI expr {Symbol *s = void_to_symbol($5); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(atoi(s->value));} SEMI assignment RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
+for_stmt : FOR LPAREN {print_label(true, 1);} assignment SEMI expr {Symbol *s = void_to_symbol($6); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true); check_always_false(atoi(s->value));} SEMI assignment RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2); print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
             ;
 
 repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_not_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(atoi(s->value));}  RPAREN SEMI
