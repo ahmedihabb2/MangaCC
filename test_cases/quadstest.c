@@ -28,7 +28,9 @@ int func(int a, int b) {
     return a + b;
 }
 
-
+for (int i = 0; i < 10; i = i + 1) {
+    c = c + 1;
+}
 
 repeat {
     c = c + 1;

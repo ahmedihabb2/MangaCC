@@ -1,48 +1,49 @@
-PUSH 1 
-POP x 
-PUSH 6 
-POP y 
-L0: 
-PUSH x 
 PUSH 5 
-GT x 5 t0 
-JUMPZERO L1 
-L2: 
+POP x 
+PUSH x 
+PUSH 3 
+GT x 3 t0 
+JUMPZERO L0 
+L1: 
 PUSH x 
 PUSH 0 
-LT x 0 t1 
-JUMPZERO L3 
-PUSH -1 
+GT x 0 t1 
+JUMPZERO L2 
+PUSH x 
+PUSH 1 
+SUB x 1 t2 
+POP x 
+JUMP L1 
+L2: 
+JUMP L3 
+L0: 
+PUSH 2 
 POP x 
 L4: 
 PUSH x 
 PUSH 0 
-GT x 0 t2 
+GT x 0 t3 
 JUMPZERO L5 
-PUSH 5 
-POP z 
 PUSH x 
 PUSH 1 
-SUB x 1 t3 
+SUB x 1 t4 
 POP x 
 JUMP L4 
 L5: 
-JUMP L2 
 L3: 
-L6: 
-PUSH y 
 PUSH 0 
-GT y 0 t4 
-JUMPZERO L7 
-PUSH y 
+POP i 
+PUSH i 
+PUSH 5 
+LT i 5 t5 
+PUSH i 
 PUSH 1 
-SUB y 1 t5 
-POP y 
-JUMP L6 
-L7: 
-JUMP L0 
-L1: 
-PUSH 0 
+ADD i 1 t6 
+POP i 
+PUSH x 
+PUSH 1 
+ADD x 1 t7 
+POP x 
 
 
 
