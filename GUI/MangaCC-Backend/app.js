@@ -25,8 +25,8 @@ app.post('/generate', (req, res) => {
         console.error(err);
     }
     // run a command to compile and run the code
-
-    exec("./build.sh test.c", (error, stdout, stderr) => {
+    console.log("Compiling and Running the code");
+    exec("./mangcc test.c", (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
             res.status(400);
