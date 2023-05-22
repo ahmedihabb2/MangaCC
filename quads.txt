@@ -34,6 +34,18 @@ PUSH 0
 
 
 
+<<<<<<< HEAD
+func: 
+PUSH 1 
+POP a 
+PUSH 5 
+POP b 
+PUSH a 
+PUSH b 
+ADD a b t1 
+POP c 
+=======
 main2: 
 PUSH 0 
+>>>>>>> 6102069db0c6057d8acec47d5371dbbff450b10a
 return
