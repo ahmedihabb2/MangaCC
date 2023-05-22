@@ -162,7 +162,7 @@
         // quads helper
         void QuadsToFile(char * filename) ;
         FILE *st ;
-
+        FILE * console_logs ;
 
 %}
 
@@ -351,11 +351,14 @@ param_call : | expr COMMA {
                 Symbol *s = void_to_symbol($1); 
                 pop(last_declared_function->arguments_names[func_param_count], inFuncScope);
                 if (s->type != last_declared_function->arguments_types[func_param_count]) {
-                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);
+                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); 
+                        fprintf(console_logs, "Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type);
+                        exit(1);
                 }
                 func_param_count++;
                 if (s == NULL) {
                     printf("Error: %s is not defined in line %d\n", s->name, line_num);
+                    fprintf(console_logs, "Error: %s is not defined in line %d\n", s->name, line_num);
                     exit(1);
                 } else {
                         // Mark the symbol as used
@@ -368,11 +371,14 @@ param_call : | expr COMMA {
                 Symbol *s = void_to_symbol($1); 
                 pop(last_declared_function->arguments_names[func_param_count], inFuncScope);
                 if (s->type != last_declared_function->arguments_types[func_param_count]) {
-                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); exit(1);
+                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type);
+                        fprintf(console_logs, "Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type);
+                        exit(1);
                 }
                 func_param_count++;
                 if (s == NULL) {
                     printf("Error: %s is not defined in line %d\n", s->name, line_num);
+                    fprintf(console_logs, "Error: %s is not defined in line %d\n", s->name, line_num);
                     exit(1);
                 } else {
                         // Mark the symbol as used
@@ -398,12 +404,14 @@ func_call_stmt : ID {
         }
         else {
             printf("Error: function '%s' not defined\n", $1);
+            fprintf(console_logs, "Error: function '%s' not defined\n", $1);
             exit(1);
         }
         } LPAREN param_call {
                 printf("func_param_count: %d\n", func_param_count);
                 if (func_param_count != last_declared_function->num_arguments) {
                         printf("Error: number of arguments in function call does not match function definition at line %d: expected: %d but found: %d\n", line_num, last_declared_function->num_arguments, func_param_count);
+                        fprintf(console_logs, "Error: number of arguments in function call does not match function definition at line %d: expected: %d but found: %d\n", line_num, last_declared_function->num_arguments, func_param_count);
                         exit(1);
                 }
                 func_param_count = 0;
@@ -443,7 +451,8 @@ void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
     // check if stack is full
     if (stack->num_tables >= stack->max_tables) {
         printf("Error: symbol table stack is full\n");
-        return;
+        fprintf(console_logs, "Error: symbol table stack is full\n");
+        exit(1);
     }
 
     // push new symbol table onto the stack
@@ -456,7 +465,8 @@ void pop_symbol_table(SymbolTableStack *stack) {
     // check if stack is empty
     if (stack->num_tables == 0) {
         printf("Error: symbol table stack is empty\n");
-        return;
+        fprintf(console_logs, "Error: symbol table stack is empty\n");
+        exit(1);
     }
 
     printf("************************************************************\n");
@@ -482,7 +492,8 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
     // check if stack is empty
     if (stack->num_tables == 0) {
         printf("Error: symbol table stack is empty\n");
-        return;
+        fprintf(console_logs, "Error: symbol table stack is empty\n");
+        exit(1);
     }
     SymbolTable *table  = NULL;
     if (is_enum){
@@ -497,6 +508,7 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
     for (int i = 0; i < table->num_symbols; i++) {
         if (strcmp(table->symbols[i].name, name) == 0) {
             printf("Error: symbol '%s' already defined\n", name);
+            fprintf(console_logs, "Error: symbol '%s' already defined\n", name);
             exit(1);
         }
     }
@@ -529,12 +541,14 @@ int check_assignment_types(int statement_type , Symbol * s , int line_num, bool 
         if(is_const)
         {
                 printf("Error: cannot assign a value to const at line %d\n", line_num);
+                fprintf(console_logs,"Error: cannot assign a value to const at line %d\n", line_num);
                 exit(1);
         }
         // Apply type conversion from int to float and vice versa
         if (statement_type == INT_ENUM && s->type == FLOAT_ENUM)
         {
                 printf("Warning: type conversion from float to int at line %d\n", line_num);
+                fprintf(console_logs,"Warning: type conversion from float to int at line %d\n", line_num);
                 if (s->name == NULL)
                 {
                         sprintf(Quads[QuadsIndex++], "Convi %s"  , s->value);
@@ -546,6 +560,7 @@ int check_assignment_types(int statement_type , Symbol * s , int line_num, bool 
         else if (statement_type == FLOAT_ENUM && s->type == INT_ENUM)
         {
                 printf("Warning: type conversion from int to float at line %d\n", line_num);
+                fprintf(console_logs,"Warning: type conversion from int to float at line %d\n", line_num);
                 if (s->name == NULL)
                 {
                         sprintf(Quads[QuadsIndex++], "Convf %s"  , s->value);
@@ -557,6 +572,7 @@ int check_assignment_types(int statement_type , Symbol * s , int line_num, bool 
         else if (statement_type != s->type)
         {
                 printf("Error: type mismatch in assignment at line %d\n", line_num);
+                fprintf(console_logs,"Error: type mismatch in assignment at line %d\n", line_num);
                 exit(1);
         }
         return -1;
@@ -569,6 +585,7 @@ void check_operand_types (char* op, int left_type, int right_type)
                 if ( left_type == STRING_ENUM || right_type == STRING_ENUM)
                 {
                         printf("Error: type mismatch in math operation at line %d strings not allowed \n", line_num);
+                        fprintf(console_logs,"Error: type mismatch in math operation at line %d strings not allowed \n", line_num);
                         exit(1);
                 }
         } 
@@ -577,6 +594,7 @@ void check_operand_types (char* op, int left_type, int right_type)
                 if (!((left_type == BOOL_ENUM || left_type ==INT_ENUM ) && (right_type == BOOL_ENUM || right_type ==INT_ENUM )))
                 {
                         printf("Error: type mismatch in logical operation at line %d operands must be int or bool \n", line_num);
+                        fprintf(console_logs,"Error: type mismatch in logical operation at line %d operands must be int or bool \n", line_num);
                         exit(1);
                 }
         }
@@ -585,6 +603,7 @@ void check_operand_types (char* op, int left_type, int right_type)
 void check_always_false(int bool_val) {
     if (bool_val == 0){
         printf("Warning: condition is always false at line %d\n", line_num);
+        fprintf(console_logs,"Warning: condition is always false at line %d\n", line_num);
     }
     return ;
 }
@@ -598,7 +617,8 @@ char* copy_value(char* value) {
             strcpy(val_copy, value);
         } else {
             printf("Error: failed to allocate memory for value copy\n");
-            return "";
+            fprintf(console_logs,"Error: failed to allocate memory for value copy\n");
+            exit(1);
         }
     }
     return val_copy;
@@ -631,6 +651,7 @@ Symbol *get_symbol(SymbolTableStack *stack, char *name) {
 
     // symbol not found
     printf("Error: Undefined '%s' at line %d \n", name, line_num);
+    fprintf(console_logs,"Error: Undefined '%s' at line %d \n", name, line_num);
     exit(1);
 }
 
@@ -668,7 +689,8 @@ Symbol add_op(void *a, void *b) {
                         s.type = FLOAT_ENUM;
                 } else {
                         printf("Error: invalid types for addition\n");
-                        return s;
+                        fprintf(console_logs,"Error: invalid types for addition\n");
+                        exit(1);
                 }
 
                 char* val_copy = copy_value(str_val);
@@ -712,7 +734,8 @@ Symbol sub_op(void *a, void *b) {
                         s.type = FLOAT_ENUM;
                 } else {
                         printf("Error: invalid types for subtraction\n");
-                        return s;
+                        fprintf(console_logs,"Error: invalid types for subtraction\n");
+                        exit(1);
                 }
 
                 char* val_copy = copy_value(str_val);
@@ -725,6 +748,7 @@ void assign_value(char * id  ,void *v ) {
         Symbol* lhs_symbol = get_symbol(stack, id);
         if (lhs_symbol == NULL) {
                 printf("Error: variable %s not declared in line %d\n", id, line_num);
+                fprintf(console_logs,"Error: variable %s not declared in line %d\n", id, line_num);
                 exit(1);
         }
         int conv = check_assignment_types(lhs_symbol->type , s,line_num,lhs_symbol->is_const);
@@ -781,7 +805,8 @@ Symbol mul_op(void *a, void *b) {
                         s.type = FLOAT_ENUM;
                 } else {
                         printf("Error: invalid types for multiplication\n");
-                        return s;
+                        fprintf(console_logs,"Error: invalid types for multiplication\n");
+                        exit(1);
                 }
 
                 char* val_copy = copy_value(str_val);
@@ -825,7 +850,8 @@ Symbol div_op(void *a, void *b) {
                         s.type = FLOAT_ENUM;
                 } else {
                         printf("Error: invalid types for division\n");
-                        return s;
+                        fprintf(console_logs,"Error: invalid types for division\n");
+                        exit(1);
                 }
 
                 char* val_copy = copy_value(str_val);
@@ -842,7 +868,8 @@ Symbol mod_op(void *a, void *b) {
                 // check if one of the operands are float type and return error
                 if (s1->type == FLOAT_ENUM || s2->type == FLOAT_ENUM) {
                         printf("Error: invalid types for modulo\n");
-                        return s;
+                        fprintf(console_logs,"Error: invalid types for modulo\n");
+                        exit(1);
                 }
 
                 // convert from string according to symbol type
@@ -871,6 +898,7 @@ void check_unused_variables() {
         for (int j = 0; j < table->num_symbols; j++) {
             if (table->symbols[j].is_used == 0 && table->symbols[j].is_func == 0) {
                 printf("Warning: variable %s declared but not used\n", table->symbols[j].name);
+                fprintf(output_file, "Warning: variable %s declared but not used\n", table->symbols[j].name);
             }
         }
 }
@@ -1017,9 +1045,11 @@ int main (void) {
         stack = create_symbol_table_stack();
         push_symbol_table(stack, create_symbol_table());
         st = fopen("symbol_table.txt", "w");
+        console_logs = fopen("console_logs.txt", "w");
         yyparse ();
         QuadsToFile("quads.txt");
         fclose(st);
+        fclose(console_logs);
         // free memory
         free(stack);
         return 0;
