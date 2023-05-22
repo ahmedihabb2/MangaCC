@@ -1,4 +1,4 @@
-int x = 4 ;
+int x = -4 ;
 const int y  = 3 ;
 
 int z = x + y ;
