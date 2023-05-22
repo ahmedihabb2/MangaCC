@@ -157,6 +157,7 @@
         void print_label(bool add_label_flag, int label_offset);
         void jump_break();
         void jump_function(char* func_name);
+        char* type_to_string(int type);
 
 
         // quads helper
@@ -509,7 +510,7 @@ void print_symbol_table()
         for (int i = stack->num_tables - 1; i>=0 ; i--) {
         SymbolTable *table = stack->tables[i];
         for (int j = 0; j < table->num_symbols; j++) {
-                fprintf(st,"%s, %d, %s, %d, %d, %d, %d, %d , %d\n",table->symbols[j].name, table->symbols[j].type, table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
+                fprintf(st,"%s, %s, %s, %d, %d, %d, %d, %d , %d\n",table->symbols[j].name, type_to_string(table->symbols[j].type), table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
                 }
         }
         fprintf(st,"==================================================================================================\n");
@@ -1018,6 +1019,25 @@ void QuadsToFile(char * filename) {
                 fprintf(fp, "%s\n", Funcs[i]);
         }
         fclose(fp);
+}
+
+char* type_to_string(int type) {
+        switch (type) {
+                case INT_ENUM:
+                        return "int";
+                case FLOAT_ENUM:
+                        return "float";
+                case STRING_ENUM:
+                        return "string";
+                case BOOL_ENUM:
+                        return "bool";
+                case VOID_ENUM:
+                        return "void";
+                case ENUM_ENUM:
+                        return "enum";
+                default:
+                        return "unknown";
+        }
 }
 
 
