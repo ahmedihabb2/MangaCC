@@ -311,7 +311,7 @@ else_if_stmt : ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN
 if_stmt  : IF LPAREN expr {jump_zero(true); Symbol *s = void_to_symbol($3); printf("if expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(atoi(s->value));} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} if_stmt
          | ELSE {jump(true, 1); print_label(false, 2);} LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
          | ELSEIF {jump(true, 1); print_label(false, 2);} LPAREN expr RPAREN LBRACE {Symbol *s = void_to_symbol($4);push_symbol_table(stack, create_symbol_table(s->value));check_always_false(atoi(s->value));} body_stmt_list RBRACE {print_label(false, 1); pop_labels(2); pop_symbol_table(stack);} else_if_stmt
-         | ENDIF {print_label(false, 1); pop_labels(2);}
+         | ENDIF {print_label(false, 1); pop_labels(1);}
          ;
 
 while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true);check_always_false(atoi(s->value));} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
