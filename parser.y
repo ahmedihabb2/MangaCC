@@ -511,7 +511,7 @@ void check_operand_types (char* op, int left_type, int right_type)
         {
                 if ( left_type == STRING_ENUM || right_type == STRING_ENUM)
                 {
-                        printf("Error: type mismatch in math operation at line %d\n strings not allowed", line_num);
+                        printf("Error: type mismatch in math operation at line %d strings not allowed \n", line_num);
                         exit(1);
                 }
         } 
@@ -519,7 +519,7 @@ void check_operand_types (char* op, int left_type, int right_type)
         {
                 if (!((left_type == BOOL_ENUM || left_type ==INT_ENUM ) && (right_type == BOOL_ENUM || right_type ==INT_ENUM )))
                 {
-                        printf("Error: type mismatch in logical operation at line %d\n operands must be int or bool", line_num);
+                        printf("Error: type mismatch in logical operation at line %d operands must be int or bool \n", line_num);
                         exit(1);
                 }
         }
