@@ -1,6 +1,8 @@
 # MangaCC
+<p align="center">
+  <img src="https://github.com/ahmedihabb2/MangaCC/assets/56611494/3ee571fb-7825-4cf4-a77e-c57af26f4140"/>
+</p>
 
-![MangaCC](https://github.com/ahmedihabb2/MangaCC/assets/57008633/feb3d47a-321a-4c06-b56d-82cdac11484f)
 
 # Language Descriptions
 
@@ -151,44 +153,55 @@
 - You can run the script by typing the following command in the terminal:
 
   ```
-  ./build.sh test_cases/if_test.c
+  ./build.sh if_test.c
   ```
 
 - Note: the test file should be in the test_cases folder.
 
 - It will print the tokens with its line number.
 
+## Quadraples Description
+| Quadraple | Description |
+|-----------|-------------|
+| PUSH (value)     | Pushing (value) to stack              |
+| POP  (ID) | Pop value from stack to the (ID)    |
+| NOT       | Getting complement of value            |
+| ADD (arg1) (arg2) (result)     | Adding (arg1) (arg2) and save value to (result)           |
+| SUB   (arg1) (arg2) (result)     | Substracting (arg1) (arg2) and save value to (result)             |
+| MUL       |             |
+| DIV       |             |
+| MOD       |             |
+| AND       |             |
+| OR        |             |
+| EQ        |             |
+| NE        |             |
+| LT        |             |
+| GT        |             |
+| LE        |             |
+| GE        |             |
+| XOR       |             |
+| JMP       |             |
+| JUMPZERO  |             |
+| JMPNONZERO|             |
+| Convi     |             |
+| Convf     |             |
 
-## To-Do
+## Contributors
 
-- Type checking => ihab (Done)
-
-- Variable usage before declaration => ihab (Done)
-
-- Function call with wrong number of arguments => weaam (Done) 
-
-- Function call with wrong type of arguments => weaam (Done) 
-
-- Function call to function that is not declared => weaam (Done)
-
-- Unused variables => ihab (Done)
-
-- Warning if the if statement condition is always false (Anwar) (Done)
-
-- expression actions => weaam (Done)
-
-- const & enum handling (Anwar) (Done)
-
-- iterations & functions handling => weaam (Done)
-
-- switch and if statements handling (Anwar)
-
-- Handle arguments with null values and check types of operands with boolean operations
-
-## Cases to be handled
-
-- nested while loop with if (wrong quadraples)
-
-- Variables with no initial value (Core dump)
-
-- For loop doesn't jump on itself (quadstest.c)
+<div align="center">
+  
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/ahmedihabb2"><img src="https://avatars.githubusercontent.com/u/57008633?v=4" width="100px;" alt=""/><br /><sub><b>Ahmed Ihab</b></sub></a><br />
+    </td>
+     <td align="center"><a href="https://github.com/yahia3200"><img src="https://avatars.githubusercontent.com/u/30212455?v=4" width="100px;" alt=""/><br /><sub><b>Yahia Zakaria</b></sub></a><br />
+    </td>
+        <td align="center"><a href="https://github.com/Yousif-Ahmed"><img src="https://avatars.githubusercontent.com/u/56611494?v=4" width="100px;" alt=""/><br /><sub><b>Youssef Ahmed</b></sub></a><br />
+    </td>
+        <td align="center"><a href="https://github.com/we2am-baSsem"><img src="https://avatars.githubusercontent.com/u/58189568?v=4" width="100px;" alt=""/><br /><sub><b>Weaam Bassem</b></sub></a><br />
+    </td>
+    
+  </tr>
+  </table>
+  
+</div>
