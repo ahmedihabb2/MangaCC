@@ -125,8 +125,11 @@
         char Quads [10000][100];
         int QuadsIndex = 0;
         char Funcs[1000][100];
+        char ForIterationBuffer[1000][100];
         int FuncsIndex = 0;
         bool inFuncScope = false;
+        bool inForScope = false;
+        int ForIterationBufferIndex = 0;
 
         int tempRegIndex = 0 ;
 
@@ -141,6 +144,7 @@
         void pop(char *s, bool inFuncScope);
         void one_op(char * op, bool inFuncScope);
         void two_op(char * op, bool inFuncScope);
+        void fill_quad_stack_from_for_buffer();
 
         // control flow functions
         void add_label();
@@ -294,12 +298,13 @@ assignment : type ID {push_id($2);} ASSIGN expr {
            ;
 
 declare : type ID {
-                add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL);
+                char* default_val = $1 == STRING_ENUM? "": "0";
+                add_symbol(stack, $2, $1, default_val, line_num, false, false, false, false, NULL);
                 push_id($2); // push the ID to the stack
                 }
         | ENUM ID ID {
-                Symbol *enum_symbol = get_symbol(stack, $2);
-                add_symbol(stack, $3, INT_ENUM, 0, line_num, false, true, false, false, NULL);
+                char* default_val = "0";
+                add_symbol(stack, $3, INT_ENUM, default_val, line_num, false, true, false, false, NULL);
                 }
         ;
 
@@ -317,7 +322,7 @@ if_stmt  : IF LPAREN expr {jump_zero(true); Symbol *s = void_to_symbol($3); prin
 while_stmt : WHILE LPAREN {print_label(true, 1);} expr {Symbol *s = void_to_symbol($4); printf("while loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true);check_always_false(atoi(s->value));} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2);  print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
            ;
            
-for_stmt : FOR LPAREN {print_label(true, 1);} assignment SEMI expr {Symbol *s = void_to_symbol($6); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true); check_always_false(atoi(s->value));} SEMI assignment RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {jump(false, 2); print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
+for_stmt : FOR LPAREN assignment SEMI {print_label(true, 1);} expr {Symbol *s = void_to_symbol($6); printf("for loop expression evaluation is: %s in line: %d\n", s->value, line_num); jump_zero(true); check_always_false(atoi(s->value));} SEMI {inForScope = true;} assignment {inForScope = false;} RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {fill_quad_stack_from_for_buffer(); jump(false, 2); print_label(false, 1); pop_labels(2); pop_symbol_table(stack);}
             ;
 
 repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);} UNTIL LPAREN expr  {jump_not_zero(false); pop_labels(1); Symbol *s = void_to_symbol($9); printf("repeat loop expression evaluation is: %s in line: %d\n", s->value, line_num);check_always_false(atoi(s->value));}  RPAREN SEMI
@@ -875,7 +880,10 @@ void push(char *s, bool inFuncScope) {
         strcpy(QuadStack[QuadStackIndex++] , s);
         if (inFuncScope) {
                 sprintf(Funcs[FuncsIndex++], "PUSH %s "  , s);
-        } else {
+        } else if (inForScope) {
+                sprintf(ForIterationBuffer[ForIterationBufferIndex++], "PUSH %s "  , s);
+        }
+         else {
                 sprintf(Quads[QuadsIndex++], "PUSH %s "  , s); 
         }
 }
@@ -888,7 +896,10 @@ void pop(char *s, bool inFuncScope) {
        --QuadStackIndex;
         if (inFuncScope) {
                 sprintf(Funcs[FuncsIndex++], "POP %s "  , s);
-         } else {
+         } if (inForScope) {
+                sprintf(ForIterationBuffer[ForIterationBufferIndex++], "POP %s "  , s);
+         } 
+         else {
                 sprintf(Quads[QuadsIndex++], "POP %s "  , s);
          }
 }
@@ -900,7 +911,10 @@ void one_op(char * op, bool inFuncScope) {
         strcpy(QuadStack[QuadStackIndex++], tempReg);
         if (inFuncScope) {
                 sprintf(Funcs[FuncsIndex++], "%s %s %s ", op, arg, QuadStack[QuadStackIndex-1]);
-        } else {
+        } else if (inForScope) {
+                sprintf(ForIterationBuffer[ForIterationBufferIndex++], "%s %s %s ", op, arg, QuadStack[QuadStackIndex-1]);
+        }
+         else {
                 sprintf(Quads[QuadsIndex++], "%s %s %s ", op, arg, QuadStack[QuadStackIndex-1]);
         }
 }
@@ -914,10 +928,21 @@ void two_op(char* op, bool inFuncScope) {
         strcpy(QuadStack[QuadStackIndex++], tempReg);
         if (inFuncScope) {
                 sprintf(Funcs[FuncsIndex++], "%s %s %s %s ", op, arg1, arg2, QuadStack[QuadStackIndex-1]);
+        } else if (inForScope) {
+                sprintf(ForIterationBuffer[ForIterationBufferIndex++], "%s %s %s %s ", op, arg1, arg2, QuadStack[QuadStackIndex-1]);
         } else {
                 sprintf(Quads[QuadsIndex++], "%s %s %s %s ", op, arg1, arg2, QuadStack[QuadStackIndex-1]);
         }
 }
+
+void fill_quad_stack_from_for_buffer() { 
+        for (int i = 0; i < ForIterationBufferIndex; i++) {
+                strcpy(Quads[QuadsIndex++], ForIterationBuffer[i]);
+        }
+        ForIterationBufferIndex = 0;
+        inForScope = false;
+}
+
 
 void add_label() {
         char temp_label[10];
