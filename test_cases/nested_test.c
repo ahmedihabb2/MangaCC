@@ -1,22 +1,18 @@
 int x= 5;
+int c = 20;
 
-if (x > 3)
+while (x > 0)
 {
-    while (x > 0)
+    if (x > 3)
     {
-        x = x - 1;
-    }
-}
-else
-{
-    x = 2;
-    while (x > 0)
-    {
-        x = x - 1;
-    }
-}
+        while (x > 0)
+        {
+            x = x - 1;
+        }
+    }endif
+    repeat {
+        c = c + 1;
+    } until (c > 10);
 
-for (int i = 0; i < 5; i= i+1)
-{
-    x = x + 1;
+    
 }
