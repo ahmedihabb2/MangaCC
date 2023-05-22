@@ -1,9 +1,3 @@
-*.yy.c
-*.tab.c
-*.tab.h
-mangcc
-
-// GUI Related
 # Logs
 logs
 *.log
