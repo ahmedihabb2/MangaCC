@@ -419,7 +419,7 @@ func_call_stmt : ID {
 switch_stmt : SWITCH LPAREN expr  {Symbol *s = void_to_symbol($3); } RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} case_stmt RBRACE {pop_symbol_table(stack);}
             ;
 
-break_stmt : BREAK
+break_stmt : BREAK {jump(false , 1);}
            |
            ;
 
