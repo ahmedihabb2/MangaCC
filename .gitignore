@@ -1,7 +1,7 @@
 *.yy.c
 *.tab.c
 *.tab.h
-mangcc
+
 quads.txt
 symbol_table.txt
 console_logs.txt
