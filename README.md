@@ -5,6 +5,9 @@
 <p align="center">
   <img src="./Images/name.svg" height="80px"/>
 </p>
+<p align="center">
+  <img src="./Images/slogan.svg" height="60px"/>
+</p>
 
 
 # Language Descriptions
