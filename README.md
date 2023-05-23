@@ -1,6 +1,6 @@
 # MangaCC
 <p align="center">
-  <img src="https://github.com/ahmedihabb2/MangaCC/assets/56611494/3ee571fb-7825-4cf4-a77e-c57af26f4140"/>
+  <img src="./Images/logo.png"/>
 </p>
 
 
