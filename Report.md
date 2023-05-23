@@ -9,6 +9,16 @@
   <img src="./Images/slogan.svg" height="60px"/>
 </p>
 
+# Used Tools and Technologies
+
+| Tool | Description |
+|-----------|-------------|
+| Flex      | Lexical Analyzer Generator              |
+| Bison  | Parser Generator    |
+| React      | Frontend framework used for GUI            |
+| NodeJS     | Backend framework          |
+| Github Actions       | CI to generate Binary and push it to backend directory          |
+
 
 # Language Descriptions
 
@@ -164,7 +174,11 @@
 
 - Note: the test file should be in the test_cases folder.
 
-- It will print the tokens with its line number.
+- Errors and warning will be printed to the terminal.
+
+- Symbol table will be generated in a txt file named **symbol_table.txt**.
+
+- The quadruples will be generated in a txt file named **quads.txt**.
 
 ## Quadraples Description
 | Quadraple | Description |
@@ -174,40 +188,28 @@
 | NOT       | Getting complement of value            |
 | ADD (arg1) (arg2) (result)     | Adding (arg1) (arg2) and save value to (result)           |
 | SUB   (arg1) (arg2) (result)     | Substracting (arg1) (arg2) and save value to (result)             |
-| MUL       |             |
-| DIV       |             |
-| MOD       |             |
-| AND       |             |
-| OR        |             |
-| EQ        |             |
-| NE        |             |
-| LT        |             |
-| GT        |             |
-| LE        |             |
-| GE        |             |
-| XOR       |             |
-| JMP       |             |
-| JUMPZERO  |             |
-| JMPNONZERO|             |
-| Convi     |             |
-| Convf     |             |
+| MUL       | Multiply (arg1) (arg2) and save value to (result)           |             |
+| DIV       | Divide (arg1) (arg2) and save value to (result)           |            |
+| MOD       | Calculate the modules of (arg1) (arg2) and save value to (result)           |            |
+| AND       |  Perform logical and between (arg1) (arg2) and save value to (result)           |            |
+| OR        |  Perform logical or between (arg1) (arg2) and save value to (result)            |
+| XOR       | Perform logical xor between (arg1) (arg2) and save value to (result)            |
+| EQ        |  Check the equality of the two operands and store the comparsion result in temp reg           |
+| NE        | Check the inequality of the two operands and store the comparsion result in temp reg            |
+| LT        | Check if the first operand is less than the second and store the comparison result in temp reg            |
+| GT        | Check if the first operand is greater than the second and store the comparison result in temp reg            |
+| LE        | Check if the first operand is less than or equal the second and store the comparison result in temp reg            |
+| GE        | Check if the first operand is greater than or equal the second and store the comparison result in temp reg            |
+| JMP L():      |  Unconditional Jump to label           |
+| JUMPZERO L(): |  Jump if the zero flag from previous command is zero           |
+| JMPNONZERO L():| Jump if the zero flag from previous command is non-zero            |
+| Convi (var/value)    | Convert float to integer            |
+| Convf (var/value)    | Convert integer to float            |
 
-## Contributors
 
-<div align="center">
-  
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/ahmedihabb2"><img src="https://avatars.githubusercontent.com/u/57008633?v=4" width="100px;" alt=""/><br /><sub><b>Ahmed Ihab</b></sub></a><br />
-    </td>
-     <td align="center"><a href="https://github.com/yahia3200"><img src="https://avatars.githubusercontent.com/u/30212455?v=4" width="100px;" alt=""/><br /><sub><b>Yahia Zakaria</b></sub></a><br />
-    </td>
-        <td align="center"><a href="https://github.com/Yousif-Ahmed"><img src="https://avatars.githubusercontent.com/u/56611494?v=4" width="100px;" alt=""/><br /><sub><b>Youssef Ahmed</b></sub></a><br />
-    </td>
-        <td align="center"><a href="https://github.com/we2am-baSsem"><img src="https://avatars.githubusercontent.com/u/58189568?v=4" width="100px;" alt=""/><br /><sub><b>Weaam Bassem</b></sub></a><br />
-    </td>
-    
-  </tr>
-  </table>
-  
-</div>
+## Bouns
+
+<p align="center">
+  <img src="./Images/error.png"/>
+  <img src="./Images/working.png" />
+</p>

@@ -29,6 +29,7 @@
         bool is_func;       // is the symbol a function?
         bool is_used;       // is the symbol used?
         Arguments* arguments; // function arguments
+        bool is_initialized; // is the symbol initialized?
         } Symbol;
 
         typedef struct {
@@ -94,6 +95,7 @@
         void assign_value(char * id  ,void *v);
         void assign_value(char * id  ,void *v );
         void check_unused_variables();
+        void check_uninitialized_variables();
         void check_always_false( Symbol *s);
         void check_operand_types (char* op, int left_type, int right_type);
         Symbol * copy_symbol(Symbol *s);
@@ -279,22 +281,30 @@ assignment : type ID {push_id($2);} ASSIGN expr {
                         sprintf(converted_val, "%s", s->value);
                 }
                 add_symbol(stack, $2, $1, converted_val, line_num, false, false, false, false, NULL);
+                Symbol *s2 = get_symbol(stack, $2);
+                s2->is_initialized = true;
                 free (converted_val);
                 pop(QuadStack[QuadStackIndex-2], inFuncScope);
                 }
               | ID ASSIGN { push_id($1);} expr {
                 assign_value($1,$4);
+                Symbol *s = get_symbol(stack, $1);
+                s->is_initialized = true;
                 pop(QuadStack[QuadStackIndex-2], inFuncScope);
                 }
               | CONST type ID { push_id($3);} ASSIGN expr {
                 Symbol* s = void_to_symbol($6);
                 add_symbol(stack, $3, $2, s->value, line_num, true, false, false, false, NULL);
+                Symbol *s2 = get_symbol(stack, $3);
+                s2->is_initialized = true;
                 pop(QuadStack[QuadStackIndex-2], inFuncScope);
               }
               | ENUM ID ID {push_id($3);} ASSIGN enum_val {
                 Symbol *enum_symbol = void_to_symbol($2);
                 Symbol* s = void_to_symbol($6);
                 add_symbol(stack, $3, INT_ENUM , s->value, line_num, false, true, false, false, NULL);
+                Symbol *s2 = get_symbol(stack, $3);
+                s2->is_initialized = true;
                 pop(QuadStack[QuadStackIndex-2], inFuncScope);
               }
            ;
@@ -306,7 +316,7 @@ declare : type ID {
                 }
         | ENUM ID ID {
                 char* default_val = "0";
-                add_symbol(stack, $3, INT_ENUM, default_val, line_num, false, true, false, false, NULL);
+                add_symbol(stack, $3, INT_ENUM, default_val, line_num, false, false, false, false, NULL);
                 }
         ;
 
@@ -332,6 +342,7 @@ repeat_stmt : REPEAT LBRACE {{print_label(true, 1);} push_symbol_table(stack, cr
         
 print_stmt : PRINT LPAREN expr RPAREN {
         Symbol* s = void_to_symbol($3);
+        printf("print %d: %s\n",line_num, s->value);
         }
         ;
 
@@ -342,8 +353,8 @@ type : INTTYPE {$$ = INT_ENUM;}
      | ENUM {$$ = ENUM_ENUM;}
      ;
 
-param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type, s.name);}
-      | type ID COMMA {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol s = *get_symbol(stack, $2); add_arguments(last_declared_function, s.type, s.name);} param
+param : type ID {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol *s = get_symbol(stack, $2); s->is_initialized = true; add_arguments(last_declared_function, s->type, s->name);}
+      | type ID COMMA {add_symbol(stack, $2, $1, 0, line_num, false, false, false, false, NULL); Symbol *s = get_symbol(stack, $2); s->is_initialized = true; add_arguments(last_declared_function, s->type, s->name);} param
       |
       ;     
 
@@ -432,7 +443,7 @@ case_stmt :   CASE expr {two_op("EQ", inFuncScope);jump_zero(true);} COLON  body
 block_stmt : LBRACE { push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
 // need to be changed    
-enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)); push(str , inFuncScope); pop($1, false);add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false, false, NULL);} enum_body 
+enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)); push(str , inFuncScope); pop($1, false);add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false, false, NULL);;} enum_body 
           | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ; push(str , inFuncScope); pop($1 ,false);add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false, false, NULL);}
           ;
 
@@ -460,6 +471,7 @@ void push_symbol_table(SymbolTableStack *stack, SymbolTable *table) {
 
 void pop_symbol_table(SymbolTableStack *stack) {
     check_unused_variables();
+    check_uninitialized_variables();
     // check if stack is empty
     if (stack->num_tables == 0) {
         printf("Error: symbol table stack is empty\n");
@@ -499,7 +511,7 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
     // here make a new copy instance from the value to avoid sharing the same pointer
     char* val_copy = copy_value(value);
 
-    Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func , is_used, arguments};
+    Symbol symbol = {name, type, val_copy, line, is_const, is_enum, is_func , is_used, arguments, false};
     table->symbols[table->num_symbols++] = symbol;
     print_symbol_table();
 }
@@ -878,9 +890,19 @@ void add_arguments(Arguments* arguments, int type, char* name) {
 void check_unused_variables() {
         SymbolTable *table = stack->tables[stack->num_tables - 1];
         for (int j = 0; j < table->num_symbols; j++) {
-            if (table->symbols[j].is_used == 0 && table->symbols[j].is_func == 0) {
+            if (table->symbols[j].is_used == 0 && table->symbols[j].is_func == 0 && table->symbols[j].is_enum == 0) {
                 printf("Warning: variable %s declared but not used\n", table->symbols[j].name);
                 fprintf(console_logs, "Warning: variable %s declared but not used\n", table->symbols[j].name);
+            }
+        }
+}
+
+void check_uninitialized_variables() {
+        SymbolTable *table = stack->tables[stack->num_tables - 1];
+        for (int j = 0; j < table->num_symbols; j++) {
+            if (table->symbols[j].is_initialized == 0 && table->symbols[j].is_func == 0 && table->symbols[j].is_enum == 0) {
+                printf("Warning: variable %s declared in line %d but not initialized\n", table->symbols[j].name, table->symbols[j].line);
+                fprintf(console_logs, "Warning: variable %s declared but not initialized\n", table->symbols[j].name);
             }
         }
 }
@@ -1057,6 +1079,6 @@ int main (void) {
 }
 
 void yyerror (char *s) {
-        fprintf (stderr, "error in line %d: %s\n", line_num, s);
+        fprintf (stderr, "Error in line %d: %s\n", line_num, s);
         fprintf (console_logs, "Error: in line %d: %s\n", line_num, s);
         } 
