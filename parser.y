@@ -1079,6 +1079,6 @@ int main (void) {
 }
 
 void yyerror (char *s) {
-        fprintf (stderr, "error in line %d: %s\n", line_num, s);
+        fprintf (stderr, "Error in line %d: %s\n", line_num, s);
         fprintf (console_logs, "Error: in line %d: %s\n", line_num, s);
         } 
