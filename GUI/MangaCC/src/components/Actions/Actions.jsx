@@ -50,12 +50,14 @@ const Actions = ({ code, setWarning, setErrors, setQuads, status, setStatus, set
                     })
             }} sx={
                 {
+                    backgroundColor: '#07a',
                     fontSize: '18px'
                 }
             }>Generate</Button>
 
             <Button variant="contained" sx={
                 {
+                    backgroundColor: '#07a',
                     fontSize: '18px'
                 }
             }>Step</Button>

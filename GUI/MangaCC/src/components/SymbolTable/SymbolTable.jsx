@@ -6,6 +6,14 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import './SymbolTable.css'
 const SymbolTable = ({ symbolTable }) => {
+    const headerStyle = {
+        fontWeight: "bold",
+        fontSize: "18px",
+    }
+    const symbolStyle = {
+        fontSize: "18px",
+        padding: "10px"
+    }
     return (
         <div className="symbol-table">
             <h2>Symbol Table</h2>
@@ -15,11 +23,11 @@ const SymbolTable = ({ symbolTable }) => {
                     <Table sx={{ minWidth: 400 }} stickyHeader aria-label="simple table">
                         <TableHead>
                             <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Type</TableCell>
-                                <TableCell>Value</TableCell>
-                                <TableCell>Line</TableCell>
-                                <TableCell>Scope</TableCell>
+                                <TableCell sx={headerStyle}>Name</TableCell>
+                                <TableCell sx={headerStyle}>Type</TableCell>
+                                <TableCell sx={headerStyle}>Value</TableCell>
+                                <TableCell sx={headerStyle}>Line</TableCell>
+                                <TableCell sx={headerStyle} >Scope</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -29,10 +37,11 @@ const SymbolTable = ({ symbolTable }) => {
                                         {
                                             <TableCell key={symbol} colSpan={5} sx={
                                                 {
-                                                    backgroundColor: "#3f51b5",
+                                                    backgroundColor: "#07a",
                                                     fontWeight: "bold",
                                                     fontSize: "16px",
-                                                    color: "white"
+                                                    color: "white",
+                                                    padding: "10px"
                                                 }
                                             }>
                                                 Line: {symbol.line}
@@ -45,13 +54,11 @@ const SymbolTable = ({ symbolTable }) => {
                                                         key={j + i}
                                                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                                     >
-                                                        <TableCell component="th" scope="row">
-                                                            {variable.name}
-                                                        </TableCell>
-                                                        <TableCell>{variable.type}</TableCell>
-                                                        <TableCell>{variable.value}</TableCell>
-                                                        <TableCell>{variable.line}</TableCell>
-                                                        <TableCell>{variable.scope}</TableCell>
+                                                        <TableCell sx={symbolStyle} component="th" scope="row">{variable.name}</TableCell>
+                                                        <TableCell sx={symbolStyle} >{variable.type}</TableCell>
+                                                        <TableCell sx={symbolStyle} >{variable.value}</TableCell>
+                                                        <TableCell sx={symbolStyle} >{variable.line}</TableCell>
+                                                        <TableCell sx={symbolStyle} >{variable.scope}</TableCell>
                                                     </TableRow>
                                                 )
                                             }

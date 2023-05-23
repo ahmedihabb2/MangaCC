@@ -6,6 +6,7 @@
 }
 
 .quadruples-content p {
-    font-family: 'Roboto';
+    font-family: "Fira code", "Fira Mono", monospace;
     font-size: 20px;
+    margin-bottom: 0.2rem;
 }
