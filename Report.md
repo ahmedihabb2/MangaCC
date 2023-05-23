@@ -1,8 +1,23 @@
 # MangaCC
 <p align="center">
-  <img src="./Images/logo.svg" width="500px"/>
-  <img src="./Images/name.svg" />
+  <img src="./Images/logo.svg" width="380px"/>
 </p>
+<p align="center">
+  <img src="./Images/name.svg" height="80px"/>
+</p>
+<p align="center">
+  <img src="./Images/slogan.svg" height="60px"/>
+</p>
+
+# Used Tools and Technologies
+
+| Tool | Description |
+|-----------|-------------|
+| Flex      | Lexical Analyzer Generator              |
+| Bison  | Parser Generator    |
+| React      | Frontend framework used for GUI            |
+| NodeJS     | Backend framework          |
+| Github Actions       | CI to generate Binary and push it to backend directory          |
 
 
 # Language Descriptions
