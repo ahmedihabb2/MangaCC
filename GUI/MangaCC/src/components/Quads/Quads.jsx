@@ -2,7 +2,7 @@ import './Quads.css';
 const Quads = ({ quads }) => {
     const stack = ['PUSH', 'POP']
     const operations = ['ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'AND', 'OR', 'NOT', 'XOR']
-    const jumps = ['JMP', 'JUMPZERO', 'JMPNONZERO']
+    const jumps = ['JUMP', 'JUMPZERO', 'JMPNONZERO']
     const conditions = ['EQ', 'NE', 'LT', 'LE', 'GT', 'GE']
     const conversions = ['Convi', 'Convf']
     return (

@@ -367,9 +367,20 @@ param_call : | expr COMMA {
                 Symbol *s = void_to_symbol($1); 
                 pop(last_declared_function->arguments_names[func_param_count], inFuncScope);
                 if (s->type != last_declared_function->arguments_types[func_param_count]) {
+                        // apply type conversion from float to int and vice versa
+                        if (s->type == INT_ENUM && last_declared_function->arguments_types[func_param_count] == FLOAT_ENUM) {
+                                // convert int to float
+                                printf("Warning: type conversion in function call at line %d: from int to float \n", line_num); 
+                                fprintf(console_logs, "Warning: type conversion in function call at line %d: from int to float \n", line_num);
+                        } else if (s->type == FLOAT_ENUM && last_declared_function->arguments_types[func_param_count] == INT_ENUM) {
+                                // convert float to int
+                                printf("Warning: type conversion in function call at line %d: from float to int \n", line_num); 
+                                fprintf(console_logs, "Warning: type conversion in function call at line %d: from float to int \n", line_num);
+                        } else {
                         printf("Error: type mismatch in function call at line %d: expected: %s but found: %s\n", line_num, type_to_string(last_declared_function->arguments_types[func_param_count]), type_to_string(s->type)); 
                         fprintf(console_logs, "Error: type mismatch in function call at line %d: expected: %s but found: %s\n", line_num, type_to_string(last_declared_function->arguments_types[func_param_count]), type_to_string(s->type));
                         exit(1);
+                        }
                 }
                 func_param_count++;
                 if (s == NULL) {
@@ -386,9 +397,19 @@ param_call : | expr COMMA {
                 Symbol *s = void_to_symbol($1); 
                 pop(last_declared_function->arguments_names[func_param_count], inFuncScope);
                 if (s->type != last_declared_function->arguments_types[func_param_count]) {
+                        if (s->type == INT_ENUM && last_declared_function->arguments_types[func_param_count] == FLOAT_ENUM) {
+                        // convert int to float
+                        printf("Warning: type conversion in function call at line %d: from int to float \n", line_num); 
+                        fprintf(console_logs, "Warning: type conversion in function call at line %d: from int to float \n", line_num);
+                        } else if (s->type == FLOAT_ENUM && last_declared_function->arguments_types[func_param_count] == INT_ENUM) {
+                                // convert float to int
+                                printf("Warning: type conversion in function call at line %d: from float to int \n", line_num); 
+                                fprintf(console_logs, "Warning: type conversion in function call at line %d: from float to int \n", line_num);
+                        } else {
                         printf("Error: type mismatch in function call at line %d: expected: %s but found: %s\n", line_num, type_to_string(last_declared_function->arguments_types[func_param_count]), type_to_string(s->type));
                         fprintf(console_logs, "Error: type mismatch in function call at line %d: expected: %s but found: %s\n", line_num, type_to_string(last_declared_function->arguments_types[func_param_count]), type_to_string(s->type));
                         exit(1);
+                        }
                 }
                 func_param_count++;
                 if (s == NULL) {
