@@ -1,6 +1,7 @@
 # MangaCC
 <p align="center">
-  <img src="./Images/logo.svg" width="400px"/>
+  <img src="./Images/logo.svg" width="500px"/>
+  <img src="./Images/name.svg" />
 </p>
 
 
