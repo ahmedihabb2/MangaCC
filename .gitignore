@@ -32,3 +32,4 @@ dist-ssr
 *.sln
 *.sw?
 GUI/MangaCC-Backend/test.c
+.vite/
