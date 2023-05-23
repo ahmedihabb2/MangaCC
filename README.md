@@ -6,7 +6,9 @@
   <img src="./Images/name.svg" height="80px"/>
 </p>
 <p align="center">
-  <img src="./Images/slogan.svg" height="60px"/>
+  <img src="./Images/slogan.svg#gh-light-mode-only" height="60px"/>
+  <img src="./Images/slogan_white.svg##gh-dark-mode-only" height="60px"/>
+  
 </p>
 
 # GUI
