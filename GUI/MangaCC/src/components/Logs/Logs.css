@@ -1,0 +1,14 @@
+.logs-content {
+    padding: 20px 20px;
+    border: 1px solid #ced4da;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 250px;
+    overflow-y: auto;
+}
+
+.logs-content p {
+    font-family: 'Roboto';
+    font-size: 15px;
+}
