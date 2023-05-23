@@ -165,10 +165,10 @@
 |-----------|-------------|
 | PUSH (value)     | Pushing (value) to stack              |
 | POP  (ID) | Pop value from stack to the (ID)    |
-| NOT       | Getting complement of value            |
+| NOT   (value)    | Getting complement of (value)            |
 | ADD (arg1) (arg2) (result)     | Adding (arg1) (arg2) and save value to (result)           |
 | SUB   (arg1) (arg2) (result)     | Substracting (arg1) (arg2) and save value to (result)             |
-| MUL       |             |
+| MUL   (arg1) (arg2) (result)    | Multiplying (arg1) and (arg2) and save to (result)            |
 | DIV       |             |
 | MOD       |             |
 | AND       |             |
@@ -180,11 +180,11 @@
 | LE        |             |
 | GE        |             |
 | XOR       |             |
-| JMP       |             |
-| JUMPZERO  |             |
-| JMPNONZERO|             |
-| Convi     |             |
-| Convf     |             |
+| JMP   (label)    | Non conditional jump to label             |
+| JUMPZERO (lable) | Jumping to label in case condition return 0 (false)                   |
+| JMPNONZERO (lable) | Jumping to label in case condition return 1 (true)            |
+| Convi  (value)   | Convert float (value) to int            |
+| Convf  (value)  | Convert int (value) to float            |
 
 ## Contributors
 
