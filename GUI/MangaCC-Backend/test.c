@@ -1,13 +1,4 @@
-const int x = 10;
-int y = 7;
-if (x > 5) 
+const int x = 5;
+if (x > 10)
 {
-  print(y);
 }endif
-
-int add (int a , int b)
-{
-}
-
-add(2.5,1);
-
