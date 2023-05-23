@@ -167,6 +167,10 @@
         FILE *st ;
         FILE * console_logs ;
 
+        // handle constExp
+        bool constEXP = 0 ;
+        void check_const (Symbol* s1 , Symbol* s2);
+
 %}
 
 %union{
@@ -237,21 +241,21 @@ body_stmt_list : stmt body_stmt_list
           ;
 
 
-expr    : expr PLUS expr        {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));two_op("ADD", inFuncScope);}
-        | expr MINUS expr       {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));two_op("SUB", inFuncScope);}
-        | expr TIMES expr       {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = mul_op($1, $3); $$ = copy_void(((void*)&s));two_op("MUL", inFuncScope);}
-        | expr DIV expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = div_op($1, $3); $$ = copy_void(((void*)&s));two_op("DIV", inFuncScope);}
-        | expr MOD expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("math" , op1->type,op2->type);Symbol s = mod_op($1, $3); $$ = copy_void(((void*)&s));two_op("MOD", inFuncScope);}
-        | expr AND expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("AND", inFuncScope);}
-        | expr OR expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("OR", inFuncScope);}
-        | expr EQ expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("EQ", inFuncScope);}
-        | expr NE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("NE", inFuncScope);}
-        | expr LT expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LT", inFuncScope);}
-        | expr GT expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GT", inFuncScope);}
-        | expr LE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LE", inFuncScope);}
-        | expr GE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GE", inFuncScope);}
-        | expr XOR expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("XOR", inFuncScope);}
-        | NOT expr              {Symbol *op1 = void_to_symbol($2);check_operand_types("logical" , op1->type,INT_ENUM);char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); one_op("NOT", inFuncScope);}
+expr    : expr PLUS expr        {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("math" , op1->type,op2->type);Symbol s = add_op($1, $3); $$ = copy_void(((void*)&s));two_op("ADD", inFuncScope);}
+        | expr MINUS expr       {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("math" , op1->type,op2->type);Symbol s = sub_op($1, $3); $$ = copy_void(((void*)&s));two_op("SUB", inFuncScope);}
+        | expr TIMES expr       {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("math" , op1->type,op2->type);Symbol s = mul_op($1, $3); $$ = copy_void(((void*)&s));two_op("MUL", inFuncScope);}
+        | expr DIV expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("math" , op1->type,op2->type);Symbol s = div_op($1, $3); $$ = copy_void(((void*)&s));two_op("DIV", inFuncScope);}
+        | expr MOD expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("math" , op1->type,op2->type);Symbol s = mod_op($1, $3); $$ = copy_void(((void*)&s));two_op("MOD", inFuncScope);}
+        | expr AND expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) && atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("AND", inFuncScope);}
+        | expr OR expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) || atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("OR", inFuncScope);}
+        | expr EQ expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) == atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("EQ", inFuncScope);}
+        | expr NE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) != atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("NE", inFuncScope);}
+        | expr LT expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) < atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LT", inFuncScope);}
+        | expr GT expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) > atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GT", inFuncScope);}
+        | expr LE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) <= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("LE", inFuncScope);}
+        | expr GE expr          {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atof(void_to_symbol($1)->value) >= atof(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("GE", inFuncScope);}
+        | expr XOR expr         {Symbol *op1 = void_to_symbol($1);Symbol *op2 = void_to_symbol($3);check_const(op1 , op2);check_operand_types("logical" , op1->type,op2->type);char str_val[20] = ""; sprintf(str_val, "%d", atoi(void_to_symbol($1)->value) ^ atoi(void_to_symbol($3)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); two_op("XOR", inFuncScope);}
+        | NOT expr              {Symbol *op1 = void_to_symbol($2);check_const(op1 , NULL);check_operand_types("logical" , op1->type,INT_ENUM);char str_val[20] = ""; sprintf(str_val, "%d", !atof(void_to_symbol($2)->value)); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = BOOL_ENUM; void *v= (void*)&s; $$ = copy_void(v); one_op("NOT", inFuncScope);}
         | LPAREN expr RPAREN    {Symbol s = *void_to_symbol($2); void *v= (void*)&s; $$ = copy_void(v);}
         | func_call_stmt        {Symbol s; void *v= (void*)&s; $$ = copy_void(v);}  // TODO
         | INT                   {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; s.type = INT_ENUM;s.name = NULL; void *v= (void*)&s; $$ = copy_void(v); push(val_copy, inFuncScope);}
@@ -596,10 +600,11 @@ void check_operand_types (char* op, int left_type, int right_type)
 }
 
 void check_always_false(Symbol *s) {
-    if (atoi(s->value) == 0 && s->type == BOOL_ENUM && s->name == NULL){
+    if (atoi(s->value) == 0 && s->type == BOOL_ENUM && s->name == NULL && constEXP == 1){
         printf("Warning: condition is always false at line %d\n", line_num);
         fprintf(console_logs,"Warning: condition is always false at line %d\n", line_num);
     }
+    constEXP = 0 ;
     return;
 }
 
@@ -1062,6 +1067,33 @@ char* type_to_string(int type) {
                         return "unknown";
         }
 }
+
+
+void check_const (Symbol* s1 , Symbol* s2){
+        if (s2 != NULL){
+                if (s1->name == NULL  && s2->name == NULL){
+                        constEXP = 1 ;
+                        return;
+                }else if (s1->name == NULL && s2->name != NULL && s2->is_const){
+                        constEXP = 1 ;
+                        return ;
+                }else if (s1->name != NULL && s1->is_const && s2->name == NULL){
+                        constEXP = 1 ;
+                        return;
+                }else if (s1->name != NULL && s2->name != NULL && s1->is_const && s2->is_const){
+                        constEXP = 1 ;
+                        return;
+                }
+        }else {
+                if (s1->name ==NULL || (s1->name != NULL && s1->is_const)){
+                        constEXP = 1 ;
+                        return ;
+                }
+        }
+        constEXP = 0 ;
+
+}
+
 
 
 int main (void) {
