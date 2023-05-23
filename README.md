@@ -6,7 +6,9 @@
   <img src="./Images/name.svg" height="80px"/>
 </p>
 <p align="center">
-  <img src="./Images/slogan.svg" height="60px"/>
+  <img src="./Images/slogan.svg#gh-light-mode-only" height="60px"/>
+  <img src="./Images/slogan_white.svg##gh-dark-mode-only" height="60px"/>
+  
 </p>
 
 # GUI
@@ -178,7 +180,7 @@
 |-----------|-------------|
 | PUSH (value)     | Pushing (value) to stack              |
 | POP  (ID) | Pop value from stack to the (ID)    |
-| NOT       | Getting complement of value            |
+| NOT   (value)    | Getting complement of (value)            |
 | ADD (arg1) (arg2) (result)     | Adding (arg1) (arg2) and save value to (result)           |
 | SUB   (arg1) (arg2) (result)     | Substracting (arg1) (arg2) and save value to (result)             |
 | MUL       | Multiply (arg1) (arg2) and save value to (result)           |             |
