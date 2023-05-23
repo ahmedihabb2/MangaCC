@@ -1,39 +1,89 @@
-PUSH 5 
-POP x 
-PUSH 20 
-POP c 
-L0: 
-PUSH x 
-PUSH 0 
-GT x 0 t0 
-JUMPZERO L1 
-PUSH x 
 PUSH 3 
-GT x 3 t1 
-JUMPZERO L2 
-L3: 
-PUSH x 
-PUSH 0 
-GT x 0 t2 
-JUMPZERO L4 
-PUSH x 
+POP b 
+PUSH a 
+PUSH b 
+ADD a b t0 
+POP c 
+PUSH 4.50 
+PUSH 6.50 
+MUL 4.50 6.50 t1 
+POP d 
 PUSH 1 
-SUB x 1 t3 
-POP x 
+POP bo 
+PUSH "MangaCC" 
+POP s 
+PUSH a 
+PUSH b 
+GT a b t2 
+JUMPZERO L0 
+PUSH c 
+PUSH 2 
+MOD c 2 t3 
+POP c 
+JUMP L1 
+L0: 
+PUSH c 
+PUSH 2 
+DIV c 2 t4 
+POP c 
+L1: 
+PUSH a 
+PUSH 2 
+LT a 2 t5 
+JUMPZERO L2 
+PUSH 0 
+POP bo 
+L2: 
+L3: 
+PUSH a 
+PUSH 0 
+GT a 0 t6 
+JUMPZERO L4 
+PUSH a 
+PUSH 1 
+SUB a 1 t7 
+POP a 
 JUMP L3 
 L4: 
-L2: 
+PUSH 0 
+POP i 
 L5: 
+PUSH i 
+PUSH 10 
+LT i 10 t9 
+JUMPZERO L6 
 PUSH c 
 PUSH 1 
-ADD c 1 t4 
+ADD c 1 t11 
+POP c 
+PUSH i 
+PUSH 1 
+ADD i 1 t10 
+POP i 
+JUMP L5 
+L6: 
+L7: 
+PUSH c 
+PUSH 1 
+ADD c 1 t12 
 POP c 
 PUSH c 
 PUSH 10 
-GT c 10 t5 
-JUMPNONZERO L5 
-JUMP  
-L0: 
+GT c 10 t13 
+JUMPNONZERO L7 
+PUSH 2 
+POP a 
+PUSH 3 
+POP b 
+JUMP func 
+POP t13 
+PUSH 0 
+POP RED 
+PUSH 1 
+POP GREEN 
+PUSH 2 
+POP BLUE 
+PUSH c_enum 
 
 
 
@@ -41,3 +91,8 @@ L0:
 
 
 
+func: 
+PUSH a 
+PUSH b 
+ADD a b t8 
+return
