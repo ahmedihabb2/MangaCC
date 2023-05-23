@@ -1,0 +1,5 @@
+.symbol-table-content {
+    border: 1px solid #ced4da;
+    height: 450px;
+    overflow-y: auto;
+}

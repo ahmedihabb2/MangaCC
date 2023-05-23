@@ -1,0 +1,38 @@
+name: Build MangaCC Binary
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build the binary
+      run: |
+            sudo apt-get update
+            sudo apt-get install bison
+            sudo apt-get install flex
+            rm -f lex.yy.c parser.tab.c parser.tab.h
+            flex scanner.l 
+            bison -d parser.y
+            gcc -o mangcc parser.tab.c lex.yy.c 
+            mv -f mangcc ./GUI/MangaCC-Backend
+
+    - name: Commit changes
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git status
+        git add .
+        git commit -m "Update binary [Manga-Bot]"
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+            

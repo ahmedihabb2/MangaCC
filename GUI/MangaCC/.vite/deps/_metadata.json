@@ -1,0 +1,86 @@
+{
+  "hash": "9acaa4d3",
+  "browserHash": "6704dd22",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "500b2a28",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "bc3d51f2",
+      "needsInterop": true
+    },
+    "react-simple-code-editor": {
+      "src": "../../node_modules/react-simple-code-editor/lib/index.js",
+      "file": "react-simple-code-editor.js",
+      "fileHash": "c159acb8",
+      "needsInterop": true
+    },
+    "prismjs/components/prism-core": {
+      "src": "../../node_modules/prismjs/components/prism-core.js",
+      "file": "prismjs_components_prism-core.js",
+      "fileHash": "fc604cbc",
+      "needsInterop": true
+    },
+    "prismjs/plugins/normalize-whitespace/prism-normalize-whitespace": {
+      "src": "../../node_modules/prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js",
+      "file": "prismjs_plugins_normalize-whitespace_prism-normalize-whitespace.js",
+      "fileHash": "ea3f7403",
+      "needsInterop": true
+    },
+    "prismjs/plugins/show-invisibles/prism-show-invisibles": {
+      "src": "../../node_modules/prismjs/plugins/show-invisibles/prism-show-invisibles.js",
+      "file": "prismjs_plugins_show-invisibles_prism-show-invisibles.js",
+      "fileHash": "c13fd9d5",
+      "needsInterop": true
+    },
+    "prismjs/components/prism-clike": {
+      "src": "../../node_modules/prismjs/components/prism-clike.js",
+      "file": "prismjs_components_prism-clike.js",
+      "fileHash": "48849571",
+      "needsInterop": true
+    },
+    "prismjs/components/prism-c": {
+      "src": "../../node_modules/prismjs/components/prism-c.js",
+      "file": "prismjs_components_prism-c.js",
+      "fileHash": "1155236b",
+      "needsInterop": true
+    },
+    "prismjs/components/prism-cpp": {
+      "src": "../../node_modules/prismjs/components/prism-cpp.js",
+      "file": "prismjs_components_prism-cpp.js",
+      "fileHash": "d5214d36",
+      "needsInterop": true
+    },
+    "@mui/material/Button": {
+      "src": "../../node_modules/@mui/material/Button/index.js",
+      "file": "@mui_material_Button.js",
+      "fileHash": "9d938373",
+      "needsInterop": false
+    },
+    "@mui/material/Alert": {
+      "src": "../../node_modules/@mui/material/Alert/index.js",
+      "file": "@mui_material_Alert.js",
+      "fileHash": "acf169e7",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-KHGVSD6V": {
+      "file": "chunk-KHGVSD6V.js"
+    },
+    "chunk-RVSLBP3T": {
+      "file": "chunk-RVSLBP3T.js"
+    },
+    "chunk-ST3U5LCA": {
+      "file": "chunk-ST3U5LCA.js"
+    },
+    "chunk-DFKQJ226": {
+      "file": "chunk-DFKQJ226.js"
+    }
+  }
+}

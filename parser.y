@@ -430,13 +430,13 @@ func_call_stmt : ID {
 switch_stmt : SWITCH LPAREN expr  {Symbol *s = void_to_symbol($3); } RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} case_stmt RBRACE {pop_symbol_table(stack);}
             ;
 
-break_stmt : BREAK
+break_stmt : BREAK {jump(false , 1);}
            |
            ;
 
-case_stmt :   CASE expr COLON body_stmt_list case_stmt
-            | CASE expr COLON body_stmt_list  
-            | DEFAULT COLON body_stmt_list  
+case_stmt :   CASE expr {two_op("EQ", inFuncScope);jump_zero(true);} COLON  body_stmt_list {print_label(false, 1);} case_stmt
+            | CASE expr {two_op("EQ", inFuncScope);jump(true, 1);} COLON  body_stmt_list 
+            | DEFAULT COLON { pop_labels(1);}  body_stmt_list  
             | 
             ;
 
@@ -519,11 +519,11 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
 void print_symbol_table()
 {
         fprintf(st,"%d\n",line_num);
-        fprintf(st,"name, type, value, line, is_const, is_enum, is_func , is_used, scope\n");
+        fprintf(st,"name, type, value, line, is_const, is_enum, is_func, is_used, scope\n");
         for (int i = stack->num_tables - 1; i>=0 ; i--) {
         SymbolTable *table = stack->tables[i];
         for (int j = 0; j < table->num_symbols; j++) {
-                fprintf(st,"%s, %s, %s, %d, %d, %d, %d, %d , %d\n",table->symbols[j].name, type_to_string(table->symbols[j].type), table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
+                fprintf(st,"%s, %s, %s, %d, %d, %d, %d, %d, %d\n",table->symbols[j].name, type_to_string(table->symbols[j].type), table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
                 }
         }
         fprintf(st,"==================================================================================================\n");
@@ -1078,4 +1078,7 @@ int main (void) {
         return 0;
 }
 
-void yyerror (char *s) {fprintf (stderr, "error in line %d: %s\n", line_num, s);} 
+void yyerror (char *s) {
+        fprintf (stderr, "error in line %d: %s\n", line_num, s);
+        fprintf (console_logs, "Error: in line %d: %s\n", line_num, s);
+        } 
