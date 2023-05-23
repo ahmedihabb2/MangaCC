@@ -259,8 +259,8 @@ expr    : expr PLUS expr        {Symbol *op1 = void_to_symbol($1);Symbol *op2 = 
         | ID                    {Symbol *s = get_symbol(stack, $1); s->is_used = true ;void *v= (void*)s; $$ = copy_void(v); push($1, inFuncScope);}
         ;
 
-enum_val : ID {Symbol s = *get_symbol(stack, $1); void *v= (void*)&s; $$ = copy_void(v);}
-         | INT  {char str_val[20] = ""; sprintf(str_val, "%d", $1); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
+enum_val : ID {Symbol s = *get_symbol(stack, $1);push($1 , inFuncScope); void *v= (void*)&s; $$ = copy_void(v);}
+         | INT  {char str_val[20] = ""; sprintf(str_val, "%d", $1); push(str_val , inFuncScope); char* val_copy = copy_value(str_val); Symbol s; s.value = val_copy; void *v= (void*)&s; $$ = copy_void(v);}
          ;
 
 assignment : type ID {push_id($2);} ASSIGN expr {
@@ -291,10 +291,11 @@ assignment : type ID {push_id($2);} ASSIGN expr {
                 add_symbol(stack, $3, $2, s->value, line_num, true, false, false, false, NULL);
                 pop(QuadStack[QuadStackIndex-2], inFuncScope);
               }
-              | ENUM ID ID ASSIGN enum_val {
+              | ENUM ID ID {push_id($3);} ASSIGN enum_val {
                 Symbol *enum_symbol = void_to_symbol($2);
-                Symbol* s = void_to_symbol($5);
+                Symbol* s = void_to_symbol($6);
                 add_symbol(stack, $3, INT_ENUM , s->value, line_num, false, true, false, false, NULL);
+                pop(QuadStack[QuadStackIndex-2], inFuncScope);
               }
            ;
 
@@ -418,21 +419,21 @@ func_call_stmt : ID {
 switch_stmt : SWITCH LPAREN expr  {Symbol *s = void_to_symbol($3); } RPAREN LBRACE {push_symbol_table(stack, create_symbol_table());} case_stmt RBRACE {pop_symbol_table(stack);}
             ;
 
-break_stmt : BREAK
+break_stmt : BREAK {jump(false , 1);}
            |
            ;
 
-case_stmt :   CASE expr COLON body_stmt_list case_stmt
-            | CASE expr COLON body_stmt_list  
-            | DEFAULT COLON body_stmt_list  
+case_stmt :   CASE expr {two_op("EQ", inFuncScope);jump_zero(true);} COLON  body_stmt_list {print_label(false, 1);} case_stmt
+            | CASE expr {two_op("EQ", inFuncScope);jump(true, 1);} COLON  body_stmt_list 
+            | DEFAULT COLON { pop_labels(1);}  body_stmt_list  
             | 
             ;
 
 block_stmt : LBRACE { push_symbol_table(stack, create_symbol_table());} body_stmt_list RBRACE {pop_symbol_table(stack);}
            ;
 // need to be changed    
-enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false, false, NULL);} enum_body 
-          | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ;add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false, false, NULL);}
+enum_body : ID COMMA {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)); push(str , inFuncScope); pop($1, false);add_symbol(stack, $1, INT_ENUM, str, line_num, false, true, false, false, NULL);} enum_body 
+          | ID {char str[20]; sprintf(str ,"%d" ,(enum_body_count++)) ; push(str , inFuncScope); pop($1 ,false);add_symbol(stack, $1, INT_ENUM,str , line_num, false, true, false, false, NULL);}
           ;
 
 enum_stmt   : ENUM ID {add_symbol(stack, $2, ENUM_ENUM, 0, line_num, false, true, false, false, NULL);} LBRACE enum_body RBRACE {enum_body_count = 0; }
