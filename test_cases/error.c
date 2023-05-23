@@ -1,7 +1,19 @@
-int a =5 ; 
-int b  =1;
-bool c  = false;
-if (a > b) {
-    int c ;
-    c = a + b ;
-} endif
+int x = 10;
+
+switch (x)
+{
+case 1:
+    x = 1;
+    break;
+case 2:
+    x = 2;
+    break;
+case 3:
+    x = 3;
+    break;
+case 4:
+    x = 4;
+    break;
+default:
+    x = 0;
+}

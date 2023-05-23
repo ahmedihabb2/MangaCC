@@ -423,9 +423,9 @@ break_stmt : BREAK
            |
            ;
 
-case_stmt :   CASE expr COLON body_stmt_list case_stmt
-            | CASE expr COLON body_stmt_list  
-            | DEFAULT COLON body_stmt_list  
+case_stmt :   CASE expr {two_op("EQ", inFuncScope);jump_zero(true);} COLON  body_stmt_list {print_label(false, 1);} case_stmt
+            | CASE expr {two_op("EQ", inFuncScope);jump(true, 1);} COLON  body_stmt_list 
+            | DEFAULT COLON { pop_labels(1);}  body_stmt_list  
             | 
             ;
 
