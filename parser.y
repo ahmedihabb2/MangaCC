@@ -363,8 +363,8 @@ param_call : | expr COMMA {
                 Symbol *s = void_to_symbol($1); 
                 pop(last_declared_function->arguments_names[func_param_count], inFuncScope);
                 if (s->type != last_declared_function->arguments_types[func_param_count]) {
-                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type); 
-                        fprintf(console_logs, "Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type);
+                        printf("Error: type mismatch in function call at line %d: expected: %s but found: %s\n", line_num, type_to_string(last_declared_function->arguments_types[func_param_count]), type_to_string(s->type)); 
+                        fprintf(console_logs, "Error: type mismatch in function call at line %d: expected: %s but found: %s\n", line_num, type_to_string(last_declared_function->arguments_types[func_param_count]), type_to_string(s->type));
                         exit(1);
                 }
                 func_param_count++;
@@ -382,8 +382,8 @@ param_call : | expr COMMA {
                 Symbol *s = void_to_symbol($1); 
                 pop(last_declared_function->arguments_names[func_param_count], inFuncScope);
                 if (s->type != last_declared_function->arguments_types[func_param_count]) {
-                        printf("Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type);
-                        fprintf(console_logs, "Error: type mismatch in function call at line %d: expected: %d but found: %d\n", line_num, last_declared_function->arguments_types[func_param_count], s->type);
+                        printf("Error: type mismatch in function call at line %d: expected: %s but found: %s\n", line_num, type_to_string(last_declared_function->arguments_types[func_param_count]), type_to_string(s->type));
+                        fprintf(console_logs, "Error: type mismatch in function call at line %d: expected: %s but found: %s\n", line_num, type_to_string(last_declared_function->arguments_types[func_param_count]), type_to_string(s->type));
                         exit(1);
                 }
                 func_param_count++;
