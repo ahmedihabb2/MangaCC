@@ -6,17 +6,18 @@
   <img src="./Images/name.svg" height="80px"/>
 </p>
 <p align="center">
-  <img src="./Images/slogan.svg#gh-light-mode-only" height="60px"/>
-  <img src="./Images/slogan_white.svg##gh-dark-mode-only" height="60px"/>
-  
+  <img src="./Images/slogan.svg" height="60px"/>
 </p>
 
-# GUI
+# Used Tools and Technologies
 
-<p align="center">
-  <img src="./Images/error.png"/>
-  <img src="./Images/working.png" />
-</p>
+| Tool | Description |
+|-----------|-------------|
+| Flex      | Lexical Analyzer Generator              |
+| Bison  | Parser Generator    |
+| React      | Frontend framework used for GUI            |
+| NodeJS     | Backend framework          |
+| Github Actions       | CI to generate Binary and push it to backend directory          |
 
 
 # Language Descriptions
@@ -173,14 +174,18 @@
 
 - Note: the test file should be in the test_cases folder.
 
-- It will print the tokens with its line number.
+- Errors and warning will be printed to the terminal.
+
+- Symbol table will be generated in a txt file named **symbol_table.txt**.
+
+- The quadruples will be generated in a txt file named **quads.txt**.
 
 ## Quadraples Description
 | Quadraple | Description |
 |-----------|-------------|
 | PUSH (value)     | Pushing (value) to stack              |
 | POP  (ID) | Pop value from stack to the (ID)    |
-| NOT   (value)    | Getting complement of (value)            |
+| NOT       | Getting complement of value            |
 | ADD (arg1) (arg2) (result)     | Adding (arg1) (arg2) and save value to (result)           |
 | SUB   (arg1) (arg2) (result)     | Substracting (arg1) (arg2) and save value to (result)             |
 | MUL       | Multiply (arg1) (arg2) and save value to (result)           |             |
@@ -200,22 +205,11 @@
 | JMPNONZERO L():| Jump if the zero flag from previous command is non-zero            |
 | Convi (var/value)    | Convert float to integer            |
 | Convf (var/value)    | Convert integer to float            |
-## Contributors
 
-<div align="center">
-  
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/ahmedihabb2"><img src="https://avatars.githubusercontent.com/u/57008633?v=4" width="100px;" alt=""/><br /><sub><b>Ahmed Ihab</b></sub></a><br />
-    </td>
-     <td align="center"><a href="https://github.com/yahia3200"><img src="https://avatars.githubusercontent.com/u/30212455?v=4" width="100px;" alt=""/><br /><sub><b>Yahia Zakaria</b></sub></a><br />
-    </td>
-        <td align="center"><a href="https://github.com/Yousif-Ahmed"><img src="https://avatars.githubusercontent.com/u/56611494?v=4" width="100px;" alt=""/><br /><sub><b>Youssef Ahmed</b></sub></a><br />
-    </td>
-        <td align="center"><a href="https://github.com/we2am-baSsem"><img src="https://avatars.githubusercontent.com/u/58189568?v=4" width="100px;" alt=""/><br /><sub><b>Weaam Bassem</b></sub></a><br />
-    </td>
-    
-  </tr>
-  </table>
-  
-</div>
+
+## Bouns
+
+<p align="center">
+  <img src="./Images/error.png"/>
+  <img src="./Images/working.png" />
+</p>

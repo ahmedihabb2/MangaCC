@@ -13,6 +13,7 @@ x = 8;
 }
 print(x);
 
-int func(int x, int y) {
+int func(int x, int y)
+{
     return x + y;
 }

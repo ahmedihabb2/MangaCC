@@ -1,0 +1,12 @@
+.quadruples-content {
+    padding: 20px 20px;
+    border: 1px solid #ced4da;
+    height: 450px;
+    overflow-y: auto;
+}
+
+.quadruples-content p {
+    font-family: "Fira code", "Fira Mono", monospace;
+    font-size: 20px;
+    margin-bottom: 0.2rem;
+}
