@@ -66,10 +66,33 @@ app.post('/generate', (req, res) => {
             console.error(err);
         }
 
+        let symbolTable = []
+        try {
+            const data = fs.readFileSync('symbol_table.txt', 'utf8');
+            const lines = data.split(/\r?\n/);
+
+            for (let i = 0; i < lines.length - 1; i++) {
+                let num = parseInt(lines[i]);
+                i += 2;
+                let current = []
+                while (i < lines.length & lines[i][0] != "=") {
+                    let currentLine = lines[i].replaceAll(',', '').split(' ');
+                    current.push({
+                        name: currentLine[0], type: currentLine[1], value: currentLine[2],
+                        line: currentLine[3], scope: currentLine[8]
+                    });
+                    i++;
+                }
+                symbolTable.push({ line: num, data: current });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+
         // send the output to client
         console.log("Sending the output to client");
         res.status(200);
-        res.send({ warnings, errors, quads });
+        res.send({ warnings, errors, quads, symbolTable });
     });
 
 })

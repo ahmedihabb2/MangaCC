@@ -4,6 +4,7 @@ import Code from './components/Code/Code';
 import Actions from './components/Actions/Actions';
 import Logs from './components/Logs/Logs';
 import Quads from './components/Quads/Quads';
+import SymbolTable from './components/SymbolTable/SymbolTable';
 
 import logo from './assets/logo.png'
 import './App.css'
@@ -14,6 +15,7 @@ function App() {
   const [errors, setErrors] = useState([])
   const [quads, setQuads] = useState([])
   const [status, setStatus] = useState('')
+  const [symbolTable, setSymbolTable] = useState([])
   return (
 
     <main>
@@ -26,12 +28,10 @@ function App() {
         <Code code={code} setCode={setCode} setStatus={setStatus} />
       </div>
       <Quads quads={quads} />
-      <div className="symbol-table">
-        <h2>Symbol Table</h2>
-      </div>
+      <SymbolTable symbolTable={symbolTable} />
       <Logs warnings={warnings} errors={errors} />
       <Actions code={code} setErrors={setErrors} setWarning={setWarnings}
-        status={status} setStatus={setStatus} setQuads={setQuads} />
+        status={status} setStatus={setStatus} setQuads={setQuads} setSymbolTable={setSymbolTable} />
     </main>
   )
 }

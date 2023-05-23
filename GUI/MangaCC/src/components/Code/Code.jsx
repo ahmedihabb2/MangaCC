@@ -17,25 +17,27 @@ const Code = ({ code, setCode, setStatus }) => {
             .map((line, i) => `<span class='editorLineNumber'>${i + 1}</span>${line}`)
             .join("\n");
     return (
-        <Editor
-            value={code}
-            onValueChange={code => {
-                setStatus('Editing')
-                setCode(code)
-            }}
-            highlight={code => hightlightWithLineNumbers(code, languages.cpp)}
-            padding={10}
-            textareaId="codeArea"
-            className="editor"
-            textareaClassName='text-area'
-            tabSize={2}
-            insertSpaces={true}
-            style={{
-                fontFamily: '"Fira code", "Fira Mono", monospace',
-                fontSize: 18,
-                outline: 0
-            }}
-        />
+        <div className="editor-wrapper">
+            <Editor
+                value={code}
+                onValueChange={code => {
+                    setStatus('Editing')
+                    setCode(code)
+                }}
+                highlight={code => hightlightWithLineNumbers(code, languages.cpp)}
+                padding={10}
+                textareaId="codeArea"
+                className="editor"
+                textareaClassName='text-area'
+                tabSize={2}
+                insertSpaces={true}
+                style={{
+                    fontFamily: '"Fira code", "Fira Mono", monospace',
+                    fontSize: 18,
+                    outline: 0
+                }}
+            />
+        </div>
     );
 }
 

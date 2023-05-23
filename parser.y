@@ -506,11 +506,11 @@ void add_symbol(SymbolTableStack *stack, char *name, int type, char* value, int 
 void print_symbol_table()
 {
         fprintf(st,"%d\n",line_num);
-        fprintf(st,"name, type, value, line, is_const, is_enum, is_func , is_used, scope\n");
+        fprintf(st,"name, type, value, line, is_const, is_enum, is_func, is_used, scope\n");
         for (int i = stack->num_tables - 1; i>=0 ; i--) {
         SymbolTable *table = stack->tables[i];
         for (int j = 0; j < table->num_symbols; j++) {
-                fprintf(st,"%s, %s, %s, %d, %d, %d, %d, %d , %d\n",table->symbols[j].name, type_to_string(table->symbols[j].type), table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
+                fprintf(st,"%s, %s, %s, %d, %d, %d, %d, %d, %d\n",table->symbols[j].name, type_to_string(table->symbols[j].type), table->symbols[j].value, table->symbols[j].line, table->symbols[j].is_const, table->symbols[j].is_enum, table->symbols[j].is_func , table->symbols[j].is_used,i);
                 }
         }
         fprintf(st,"==================================================================================================\n");

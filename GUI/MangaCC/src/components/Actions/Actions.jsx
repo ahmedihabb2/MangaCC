@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Button from '@mui/material/Button';
 import './Actions.css'
-const Actions = ({ code, setWarning, setErrors, setQuads, status, setStatus }) => {
+const Actions = ({ code, setWarning, setErrors, setQuads, status, setStatus, setSymbolTable }) => {
     const [loading, setLoading] = useState(false)
 
     return (
@@ -20,25 +20,50 @@ const Actions = ({ code, setWarning, setErrors, setQuads, status, setStatus }) =
                     .then(res => res.json())
                     .then(
                         (result) => {
-                            const { warnings, errors, quads } = result
+                            const { warnings, errors, quads, symbolTable } = result
                             setWarning(warnings)
                             setErrors(errors)
-                            setQuads(quads)
+
                             setLoading(false)
                             if (errors.length > 0) {
                                 setStatus('Error')
+                                setSymbolTable([])
+                                setQuads([])
                             }
                             else {
-                                setStatus('Success')
+                                if (warnings.length > 0) {
+                                    setStatus('Warning')
+                                }
+                                else {
+                                    setStatus('Success')
+                                }
+                                setSymbolTable(symbolTable)
+                                setQuads(quads)
                             }
 
 
                         }
-                    )
-            }}>Generate</Button>
+                    ).catch((error) => {
+                        setLoading(false)
+                        setStatus('Error')
+                        console.log(error)
+                    })
+            }} sx={
+                {
+                    fontSize: '18px'
+                }
+            }>Generate</Button>
 
-            <Button variant="contained">Step</Button>
-            <div className='status'>Status: {status}</div>
+            <Button variant="contained" sx={
+                {
+                    fontSize: '18px'
+                }
+            }>Step</Button>
+            <div className='status' style={
+                {
+                    color: status === 'Error' ? 'red' : status === 'Success' ? 'green' : status === 'Warning' ? 'orange' : 'black',
+                }
+            }>Status: {status}</div>
         </div>
     );
 }

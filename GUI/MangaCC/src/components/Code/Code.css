@@ -1,6 +1,11 @@
+.editor-wrapper {
+    height: 450px;
+    overflow: auto;
+}
+
 .editor {
     min-width: 300px;
-    height: 450px;
+    min-height: 450px;
     counter-reset: line;
     border: 1px solid #ced4da;
 }
@@ -11,6 +16,8 @@
 }
 
 .editor pre {
+    display: block;
+    border: solid 2px blue;
     padding-left: 60px !important;
 }
 
